@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AUTOGRAMM — Leave Your Trace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#08080A; --bg2:#0d0d0f; --bg3:#111113;
+  --cyan:#00D4E8; --orange:#FF5733; --judge:#8B5CF6;
+  --ghost:#E5E5E5; --dim:#555566;
+  --border:#1a1a1e; --border2:#2a2a32;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);font-family:'Barlow',sans-serif;color:var(--ghost);cursor:default}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.035) 2px,rgba(0,0,0,.035) 4px);pointer-events:none;z-index:9999}
+
+/* ── SCREEN SYSTEM ── */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;transition:opacity .5s ease,transform .5s ease;overflow:hidden}
+.screen.hidden{opacity:0;pointer-events:none;transform:translateY(12px)}
+.screen.active{opacity:1;pointer-events:all;transform:translateY(0)}
+
+/* ── SHARED NAV ── */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;border-bottom:0.5px solid var(--border);background:var(--bg);flex-shrink:0;z-index:10}
+.nav-logo{font-family:'Chakra Petch',monospace;font-size:11px;font-weight:700;letter-spacing:.28em;color:var(--cyan);text-transform:uppercase}
+.nav-logo em{color:#333;font-style:normal}
+.nav-center{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
+.nav-right{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--dim)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ════════════════════════════════════
+   SCREEN 1 — LANDING
+════════════════════════════════════ */
+#screen-landing{background:var(--bg)}
+
+.landing-body{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;position:relative}
+.land-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,232,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,232,.022) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.land-glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,232,.055) 0%,transparent 65%);top:-120px;left:-80px;pointer-events:none}
+
+/* LEFT copy */
+.land-left{display:flex;flex-direction:column;justify-content:center;padding:60px 56px 60px 40px;position:relative;z-index:2}
+.land-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.25em;color:var(--cyan);text-transform:uppercase;margin-bottom:20px;opacity:0;animation:fadeUp .6s ease forwards .15s}
+.land-h1{font-family:'Chakra Petch',monospace;font-size:clamp(32px,4vw,52px);font-weight:700;line-height:1.06;letter-spacing:.02em;text-transform:uppercase;opacity:0;animation:fadeUp .6s ease forwards .3s}
+.land-h1 span{color:var(--cyan)}
+.land-sub{margin-top:18px;font-size:14px;line-height:1.65;color:#666;max-width:380px;opacity:0;animation:fadeUp .6s ease forwards .45s}
+.land-sub strong{color:#999;font-weight:500}
+.land-cta-row{display:flex;gap:12px;margin-top:32px;opacity:0;animation:fadeUp .6s ease forwards .6s}
+
+.btn-primary{font-family:'Chakra Petch',monospace;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#08080A;background:var(--cyan);border:none;padding:13px 26px;cursor:pointer;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:box-shadow .2s;position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);transform:translateX(-100%);transition:transform .3s}
+.btn-primary:hover::before{transform:translateX(0)}
+.btn-primary:hover{box-shadow:0 0 28px rgba(0,212,232,.4)}
+.btn-ghost{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);background:transparent;border:0.5px solid var(--border2);padding:13px 18px;cursor:pointer;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);transition:all .2s}
+.btn-ghost:hover{color:var(--ghost);border-color:#444}
+
+.land-stats{display:flex;gap:28px;margin-top:44px;padding-top:24px;border-top:0.5px solid var(--border);opacity:0;animation:fadeUp .6s ease forwards .75s}
+.ls-item .ls-num{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--ghost);font-variant-numeric:tabular-nums}
+.ls-item .ls-num.c{color:var(--cyan)}
+.ls-item .ls-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.15em;color:var(--dim);text-transform:uppercase;margin-top:2px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* RIGHT leaderboard */
+.land-right{display:flex;flex-direction:column;justify-content:center;padding:60px 40px 60px 12px;position:relative;z-index:2}
+.lb-widget{background:#0a0a0c;border:0.5px solid var(--border2);border-top:2px solid var(--cyan);opacity:0;animation:fadeUp .7s ease forwards .45s}
+.lb-hd{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:0.5px solid var(--border)}
+.lb-hd-t{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
+.lb-hd-r{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--cyan);text-transform:uppercase}
+.lb-row{display:grid;grid-template-columns:28px 1fr 72px;gap:0 8px;align-items:center;padding:10px 14px;border-bottom:0.5px solid #0c0c0e;cursor:pointer;transition:background .15s;position:relative}
+.lb-row:hover{background:#0f0f12}
+.lb-row.me{background:rgba(0,212,232,.04);border-left:2px solid var(--cyan)}
+.lb-pos{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);text-align:center;font-variant-numeric:tabular-nums}
+.lb-row.me .lb-pos{color:var(--cyan)}
+.lb-machine{display:flex;flex-direction:column;gap:1px}
+.lb-car{font-family:'Chakra Petch',monospace;font-size:12px;font-weight:600;color:var(--ghost)}
+.lb-row.me .lb-car{color:var(--cyan)}
+.lb-spec{font-family:'JetBrains Mono',monospace;font-size:8px;color:#3a3a42;letter-spacing:.04em}
+.lb-time{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--ghost);font-variant-numeric:tabular-nums;text-align:right}
+.lb-row.me .lb-time{color:var(--cyan)}
+.lb-delta{font-family:'JetBrains Mono',monospace;font-size:8px;color:#333;text-align:right;font-variant-numeric:tabular-nums}
+.lb-foot{padding:8px 14px;display:flex;justify-content:space-between;align-items:center}
+.lb-foot-t{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:#252528;text-transform:uppercase}
+.lb-cta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--cyan);text-transform:uppercase;cursor:pointer;opacity:.6;transition:opacity .2s}
+.lb-cta:hover{opacity:1}
+.telem-strip{height:28px;margin-top:6px;opacity:0;animation:fadeUp .5s ease forwards .85s}
+.telem-strip svg{width:100%;height:100%;display:block}
+
+/* ════════════════════════════════════
+   SCREEN 2 — OTTO ONBOARDING
+════════════════════════════════════ */
+#screen-onboard{background:var(--bg)}
+.onboard-shell{display:grid;grid-template-columns:200px 1fr 200px;flex:1;overflow:hidden}
+
+/* progress sidebar */
+.prog-sidebar{border-right:0.5px solid var(--border);padding:20px 0;display:flex;flex-direction:column;background:var(--bg)}
+.prog-section-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.22em;color:#2a2a32;text-transform:uppercase;padding:0 14px 10px}
+.prog-step{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:2px solid transparent;transition:all .2s;position:relative}
+.prog-step.done{border-left-color:#2a2a32}
+.prog-step.active{border-left-color:var(--orange);background:rgba(255,87,51,.04)}
+.prog-step.locked{opacity:.35}
+.ps-num{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);width:16px;flex-shrink:0;margin-top:1px}
+.prog-step.done .ps-num{color:#2a2a32}
+.prog-step.active .ps-num{color:var(--orange)}
+.ps-body{}
+.ps-title{font-family:'Chakra Petch',monospace;font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
+.prog-step.active .ps-title{color:var(--ghost)}
+.prog-step.done .ps-title{color:#333}
+.ps-sub{font-family:'JetBrains Mono',monospace;font-size:8px;color:#2a2a32;margin-top:2px;letter-spacing:.04em}
+.prog-step.active .ps-sub{color:#444}
+.ps-check{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;color:#2a2a32}
+.prog-step.done .ps-check{color:var(--cyan)}
+
+/* twin preview sidebar */
+.twin-sidebar{border-left:0.5px solid var(--border);padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:0;overflow-y:auto}
+.twin-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;margin-bottom:12px}
+.twin-card{background:var(--bg2);border:0.5px solid var(--border2);border-top:1.5px solid transparent;padding:12px;transition:border-color .4s}
+.twin-card.has-data{border-top-color:var(--cyan)}
+.twin-empty{font-family:'JetBrains Mono',monospace;font-size:9px;color:#2a2a32;letter-spacing:.08em;line-height:1.7}
+.twin-field{margin-bottom:8px;padding-bottom:8px;border-bottom:0.5px solid var(--border)}
+.twin-field:last-child{border-bottom:none;margin-bottom:0}
+.tf-key{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;margin-bottom:2px}
+.tf-val{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ghost)}
+.tf-val.c{color:var(--cyan)}
+.tf-val.empty{color:#252528;font-style:italic}
+
+/* chat center */
+.otto-chat{display:flex;flex-direction:column;overflow:hidden;background:var(--bg2)}
+.otto-header{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:0.5px solid var(--border);background:var(--bg);flex-shrink:0}
+.otto-dot{width:7px;height:7px;border-radius:50%;background:var(--orange);box-shadow:0 0 8px var(--orange);animation:blink 2s ease-in-out infinite}
+.otto-name{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--orange);text-transform:uppercase}
+.otto-kb{font-family:'JetBrains Mono',monospace;font-size:8px;color:#333;letter-spacing:.06em;margin-left:auto}
+
+.chat-feed{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.chat-feed::-webkit-scrollbar{width:3px}
+.chat-feed::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.msg{display:flex;flex-direction:column;gap:3px;max-width:86%}
+.msg.user{align-self:flex-end;align-items:flex-end}
+.msg.otto{align-self:flex-start;align-items:flex-start}
+.msg-meta{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;color:#2a2a32;text-transform:uppercase}
+.msg.otto .msg-meta{color:rgba(255,87,51,.4)}
+.msg-bubble{padding:10px 12px;font-size:12px;line-height:1.65;color:#aaa}
+.msg.user .msg-bubble{background:rgba(0,212,232,.07);border:0.5px solid rgba(0,212,232,.18);color:var(--ghost);clip-path:polygon(0% 0%,calc(100% - 6px) 0%,100% 6px,100% 100%,0% 100%)}
+.msg.otto .msg-bubble{background:var(--bg3);border:0.5px solid var(--border2);border-left:2px solid var(--orange)}
+.msg.otto .msg-bubble strong{color:var(--ghost)}
+.msg.otto .msg-bubble .c{color:var(--cyan)}
+.msg.otto .msg-bubble .o{color:var(--orange)}
+
+/* quick reply chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;align-self:flex-start}
+.chip{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;padding:5px 10px;border:0.5px solid var(--border2);color:var(--dim);cursor:pointer;transition:all .15s;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);background:transparent}
+.chip:hover{border-color:rgba(255,87,51,.35);color:var(--ghost);background:rgba(255,87,51,.05)}
+
+/* typing */
+.typing-wrap{display:none;align-self:flex-start;padding:10px 14px;background:var(--bg3);border:0.5px solid var(--border2);border-left:2px solid var(--orange);align-items:center;gap:5px}
+.typing-wrap.active{display:flex}
+.t-dot{width:4px;height:4px;border-radius:50%;background:var(--orange);opacity:.3;animation:tdot 1.2s ease-in-out infinite}
+.t-dot:nth-child(2){animation-delay:.15s}
+.t-dot:nth-child(3){animation-delay:.3s}
+@keyframes tdot{0%,80%,100%{opacity:.2;transform:scale(.9)}40%{opacity:1;transform:scale(1.1)}}
+
+/* input */
+.input-area{border-top:0.5px solid var(--border);padding:10px 14px;background:var(--bg);display:flex;gap:0;flex-shrink:0}
+.chat-input{flex:1;background:var(--bg3);border:0.5px solid var(--border2);border-right:none;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ghost);outline:none;letter-spacing:.04em;transition:border-color .2s}
+.chat-input::placeholder{color:#2a2a32}
+.chat-input:focus{border-color:rgba(255,87,51,.25)}
+.send-btn{background:var(--orange);border:none;padding:0 16px;cursor:pointer;clip-path:polygon(0% 0%,calc(100% - 5px) 0%,100% 5px,100% 100%,0% 100%);transition:box-shadow .2s;flex-shrink:0}
+.send-btn:hover{box-shadow:0 0 16px rgba(255,87,51,.35)}
+.send-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* ════════════════════════════════════
+   SCREEN 3 — DASHBOARD
+════════════════════════════════════ */
+#screen-dash{background:var(--bg)}
+.dash-shell{display:grid;grid-template-columns:190px 1fr;flex:1;overflow:hidden}
+
+/* hero strip */
+.dash-hero{background:linear-gradient(135deg,var(--bg) 0%,#0f0f12 100%);padding:16px 20px 0;border-bottom:0.5px solid #1a1a1e;position:relative;overflow:hidden;flex-shrink:0}
+.dash-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,232,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,232,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.dh-inner{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;position:relative;z-index:1}
+.dh-avatar{width:56px;height:56px;background:#1a1a1e;border:1.5px solid var(--cyan);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Chakra Petch',monospace;font-size:17px;font-weight:700;color:var(--cyan);flex-shrink:0;position:relative}
+.dh-avatar::after{content:'✓ VERIFIED';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;color:#08080A;background:var(--cyan);padding:2px 5px;white-space:nowrap;clip-path:polygon(3px 0%,100% 0%,calc(100% - 3px) 100%,0% 100%)}
+.dh-info{padding-top:2px}
+.dh-handle{font-family:'Chakra Petch',monospace;font-size:20px;font-weight:700;letter-spacing:.04em;color:var(--ghost);line-height:1}
+.dh-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:.12em;margin-top:2px}
+.dh-bio{font-size:11px;color:#555;margin-top:5px}
+.dh-tags{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.dh-tag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;padding:2px 7px;border:0.5px solid #2a2a30;color:#666;text-transform:uppercase}
+.dh-tag.c{border-color:rgba(0,212,232,.35);color:var(--cyan)}
+.dh-tag.o{border-color:rgba(255,87,51,.35);color:var(--orange)}
+.dh-stats{display:grid;grid-template-columns:repeat(3,auto);gap:1px;background:#1a1a1e;align-self:stretch}
+.dh-st{background:var(--bg);padding:10px 14px;text-align:center}
+.dh-st-num{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--ghost);font-variant-numeric:tabular-nums}
+.dh-st-num.c{color:var(--cyan)}
+.dh-st-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:#555;text-transform:uppercase;margin-top:2px}
+.tstrip{height:32px;position:relative;z-index:1;margin-top:10px}
+.tstrip svg{width:100%;height:100%}
+
+/* sidebar */
+.dash-sidebar{border-right:0.5px solid #1a1a1e;padding:12px 0;overflow-y:auto}
+.dsb-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.2em;color:#333;text-transform:uppercase;padding:0 12px 6px}
+.dsb-item{display:flex;align-items:center;gap:7px;padding:8px 12px;cursor:pointer;transition:background .15s;border-left:2px solid transparent}
+.dsb-item:hover{background:#0f0f11}
+.dsb-item.active{background:#0f0f11;border-left-color:var(--cyan)}
+.dsb-icon{width:13px;height:13px;color:#444;flex-shrink:0}
+.dsb-item.active .dsb-icon{color:var(--cyan)}
+.dsb-text{font-family:'JetBrains Mono',monospace;font-size:11px;color:#555;letter-spacing:.04em}
+.dsb-item.active .dsb-text{color:var(--ghost)}
+.dsb-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 5px;background:rgba(0,212,232,.1);color:var(--cyan);border-radius:2px}
+.dsb-badge.o{background:rgba(255,87,51,.1);color:var(--orange)}
+
+/* dash content */
+.dash-content{overflow-y:auto;padding:14px}
+.dash-content::-webkit-scrollbar{width:3px}
+.dash-content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.panel{display:none}
+.panel.active{display:block}
+
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-title{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:#555;text-transform:uppercase}
+.act-btn{font-family:'Chakra Petch',monospace;font-size:9px;letter-spacing:.1em;color:var(--cyan);background:rgba(0,212,232,.07);border:0.5px solid rgba(0,212,232,.2);padding:4px 10px;cursor:pointer;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);text-transform:uppercase}
+
+.best-lap{background:var(--bg2);border:0.5px solid #1e1e22;border-top:1.5px solid var(--cyan);padding:12px;margin-bottom:10px;position:relative;overflow:hidden}
+.best-lap::before{content:'BEST LAP';position:absolute;top:7px;right:10px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.18em;color:#222}
+.bl-num{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;color:var(--cyan);font-variant-numeric:tabular-nums;line-height:1}
+.bl-track{font-family:'JetBrains Mono',monospace;font-size:9px;color:#555;letter-spacing:.1em;margin-top:2px;text-transform:uppercase}
+.bl-meta{display:flex;gap:14px;margin-top:8px}
+.bl-item{display:flex;flex-direction:column;gap:2px}
+.bl-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--ghost);font-variant-numeric:tabular-nums}
+.bl-key{font-family:'JetBrains Mono',monospace;font-size:8px;color:#444;letter-spacing:.1em;text-transform:uppercase}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.stat-card{background:var(--bg2);border:0.5px solid #1e1e22;padding:10px}
+.sc-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--ghost);font-variant-numeric:tabular-nums}
+.sc-val.c{color:var(--cyan)}
+.sc-val.o{color:var(--orange)}
+.sc-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:#444;text-transform:uppercase;margin-top:2px}
+.sc-sub{font-size:10px;color:#333;margin-top:3px}
+.cbar{margin-top:5px;height:3px;background:#1a1a1e;border-radius:2px;overflow:hidden}
+.cbar-fill{height:100%;background:var(--cyan);border-radius:2px}
+
+/* car card */
+.car-card{background:var(--bg2);border:0.5px solid #1e1e22;padding:12px;margin-bottom:8px}
+.cc-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid #1a1a1e}
+.cc-ico{width:32px;height:32px;background:var(--bg3);border:0.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cc-name{font-family:'Chakra Petch',monospace;font-size:13px;font-weight:700;color:var(--ghost)}
+.cc-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:#555;margin-top:1px}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.spec-row{display:flex;flex-direction:column;padding:6px 0;border-bottom:0.5px solid #141416}
+.spec-row:nth-child(odd){padding-right:10px}
+.spec-row:nth-child(even){padding-left:10px;border-left:0.5px solid #141416}
+.sk{font-family:'JetBrains Mono',monospace;font-size:8px;color:#444;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1px}
+.sv{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ghost)}
+.sv.c{color:var(--cyan)}
+
+/* leaderboard */
+.lb-row-d{display:grid;grid-template-columns:26px 1fr auto;gap:7px;align-items:center;padding:8px 10px;border-bottom:0.5px solid #0f0f11;cursor:pointer;transition:background .15s}
+.lb-row-d:hover{background:#0f0f11}
+.lb-row-d.me{background:rgba(0,212,232,.04);border-left:1.5px solid var(--cyan)}
+.lbd-pos{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);text-align:center;font-variant-numeric:tabular-nums}
+.lb-row-d.me .lbd-pos{color:var(--cyan)}
+.lbd-machine{display:flex;flex-direction:column;gap:1px}
+.lbd-car{font-family:'Chakra Petch',monospace;font-size:11px;font-weight:600;color:var(--ghost)}
+.lb-row-d.me .lbd-car{color:var(--cyan)}
+.lbd-spec{font-family:'JetBrains Mono',monospace;font-size:8px;color:#3a3a42}
+.lbd-time{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--ghost);font-variant-numeric:tabular-nums;text-align:right}
+.lb-row-d.me .lbd-time{color:var(--cyan)}
+
+/* otto panel in dash */
+.otto-panel{background:var(--bg2);border:0.5px solid #1e1e22;border-top:1.5px solid var(--orange);padding:12px;margin-bottom:10px}
+.op-hd{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.op-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:blink 2s infinite}
+.op-name{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--orange);text-transform:uppercase}
+.op-msg{background:var(--bg3);border:0.5px solid #1e1e22;border-left:2px solid var(--orange);padding:9px;font-size:12px;color:#999;line-height:1.6}
+.op-msg strong{color:var(--ghost)}
+.op-actions{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}
+.op-btn{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;padding:4px 9px;border:0.5px solid #2a2a30;color:#555;cursor:pointer;text-transform:uppercase;background:transparent;transition:all .15s;clip-path:polygon(3px 0%,100% 0%,calc(100% - 3px) 100%,0% 100%)}
+.op-btn:hover{border-color:rgba(255,87,51,.3);color:var(--orange);background:rgba(255,87,51,.05)}
+
+/* confetti-style verified flash */
+.verified-flash{position:fixed;inset:0;background:rgba(0,212,232,.06);z-index:500;pointer-events:none;opacity:0;transition:opacity .4s}
+.verified-flash.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- VERIFIED FLASH -->
+<div class="verified-flash" id="verifiedFlash"></div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 1: LANDING
+════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="nav">
+    <div class="nav-logo">AUTO<em>GRAMM</em></div>
+    <div class="nav-center">// Performance Data Infrastructure · Moscow Raceway</div>
+    <div class="nav-right"><div class="live-dot"></div> LIVE</div>
+  </div>
+
+  <div class="landing-body">
+    <div class="land-grid"></div>
+    <div class="land-glow"></div>
+
+    <div class="land-left">
+      <div class="land-tag">// The machine runs the leaderboard</div>
+      <h1 class="land-h1">Your car<br>earns its<br><span>rank.</span></h1>
+      <p class="land-sub">Hardware linked to track time. Every lap <strong>verified by AI</strong>, every build public. If it's not logged — it didn't happen.</p>
+      <div class="land-cta-row">
+        <button class="btn-primary" onclick="goToOnboard()">CLAIM YOUR HANDLE →</button>
+        <button class="btn-ghost" onclick="goToOnboard()">See How</button>
+      </div>
+      <div class="land-stats">
+        <div class="ls-item"><div class="ls-num c">2,847</div><div class="ls-lbl">Verified Laps</div></div>
+        <div class="ls-item"><div class="ls-num">38</div><div class="ls-lbl">Machines</div></div>
+        <div class="ls-item"><div class="ls-num">100</div><div class="ls-lbl">Verified Badges</div></div>
+      </div>
+    </div>
+
+    <div class="land-right">
+      <div class="lb-widget">
+        <div class="lb-hd">
+          <span class="lb-hd-t">// Moscow Raceway · GT Class</span>
+          <span class="lb-hd-r">Live · 38 machines</span>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">01</span>
+          <div class="lb-machine"><span class="lb-car">GT-R R35</span><span class="lb-spec">Haltech Elite 2500 · HKS GT800 · Rays TE37</span></div>
+          <div><div class="lb-time">1:42.381</div><div class="lb-delta">—</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">02</span>
+          <div class="lb-machine"><span class="lb-car">BMW M3 E92</span><span class="lb-spec">KW V3 · MHD Stage 2 · Stoptech ST-60</span></div>
+          <div><div class="lb-time">1:43.014</div><div class="lb-delta">+0.633</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">03</span>
+          <div class="lb-machine"><span class="lb-car">GR86</span><span class="lb-spec">BC Racing BR · Radium FPR · R888R</span></div>
+          <div><div class="lb-time">1:43.777</div><div class="lb-delta">+1.396</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">04</span>
+          <div class="lb-machine"><span class="lb-car">Civic Type R FK8</span><span class="lb-spec">Mugen Aero · Endless Brakes</span></div>
+          <div><div class="lb-time" style="color:var(--dim)">1:44.220</div><div class="lb-delta">+1.839</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()" style="border-bottom:none">
+          <span class="lb-pos">05</span>
+          <div class="lb-machine"><span class="lb-car">BMW M4 G82</span><span class="lb-spec">CSL Parts · Michelin Cup 2</span></div>
+          <div><div class="lb-time">1:44.811</div><div class="lb-delta">+2.430</div></div>
+        </div>
+        <div class="lb-foot">
+          <span class="lb-foot-t">+2,842 more machines</span>
+          <span class="lb-cta" onclick="goToOnboard()">→ Claim your spot</span>
+        </div>
+      </div>
+      <div class="telem-strip">
+        <svg viewBox="0 0 480 28" preserveAspectRatio="none">
+          <polyline points="0,20 28,20 42,6 62,5 76,22 96,24 110,12 128,9 144,20 162,22 176,5 200,2 214,16 232,18 246,8 264,6 278,15 298,20 312,9 330,6 344,13 362,15 376,3 398,1 412,10 430,18 444,9 460,7 476,14" fill="none" stroke="#00D4E8" stroke-width="1" opacity=".3"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 2: OTTO ONBOARDING
+════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-onboard">
+  <div class="nav">
+    <div class="nav-logo">AUTO<em>GRAMM</em></div>
+    <div class="nav-center" id="onboard-step-label">// Step 1 of 4 — Identity</div>
+    <div class="nav-right" style="cursor:pointer;color:var(--dim)" onclick="goToLanding()">← Back</div>
+  </div>
+
+  <div class="onboard-shell">
+
+    <!-- Progress sidebar -->
+    <div class="prog-sidebar">
+      <div style="padding:0 0 10px;border-bottom:0.5px solid var(--border);margin-bottom:10px"></div>
+      <div class="prog-section-lbl">// Digital Audit</div>
+
+      <div class="prog-step active" id="ps-1">
+        <span class="ps-num">01</span>
+        <div class="ps-body">
+          <div class="ps-title">Identity</div>
+          <div class="ps-sub">Claim your handle</div>
+        </div>
+        <span class="ps-check">✓</span>
+      </div>
+      <div class="prog-step locked" id="ps-2">
+        <span class="ps-num">02</span>
+        <div class="ps-body">
+          <div class="ps-title">Digital Twin</div>
+          <div class="ps-sub">Your machine's DNA</div>
+        </div>
+        <span class="ps-check">✓</span>
+      </div>
+      <div class="prog-step locked" id="ps-3">
+        <span class="ps-num">03</span>
+        <div class="ps-body">
+          <div class="ps-title">Telemetry</div>
+          <div class="ps-sub">Upload your log</div>
+        </div>
+        <span class="ps-check">✓</span>
+      </div>
+      <div class="prog-step locked" id="ps-4">
+        <span class="ps-num">04</span>
+        <div class="ps-body">
+          <div class="ps-title">Verified</div>
+          <div class="ps-sub">Get ranked</div>
+        </div>
+        <span class="ps-check">✓</span>
+      </div>
+
+      <div style="margin-top:auto;padding:14px;border-top:0.5px solid var(--border)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.15em;color:#2a2a32;text-transform:uppercase;line-height:1.7">Otto collects your data<br>through conversation.<br>No forms. No friction.</div>
+      </div>
+    </div>
+
+    <!-- Otto chat -->
+    <div class="otto-chat">
+      <div class="otto-header">
+        <div class="otto-dot"></div>
+        <span class="otto-name">Otto — AI Concierge · Online</span>
+        <span class="otto-kb">UNOST'83 Knowledge Base</span>
+      </div>
+
+      <div class="chat-feed" id="onboardFeed"></div>
+
+      <div class="typing-wrap" id="onboardTyping">
+        <div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#444;margin-left:5px;letter-spacing:.08em">OTTO</span>
+      </div>
+
+      <div class="input-area">
+        <input type="text" class="chat-input" id="onboardInput" placeholder="Type your answer..." autocomplete="off">
+        <button class="send-btn" id="onboardSendBtn" onclick="onboardSend()">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#08080A" stroke-width="2"><line x1="2" y1="8" x2="14" y2="8"/><polyline points="9 3 14 8 9 13"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Digital Twin preview -->
+    <div class="twin-sidebar">
+      <div class="twin-lbl">// Digital Twin · Building</div>
+      <div class="twin-card" id="twinCard">
+        <div class="twin-empty" id="twinEmpty">Waiting for<br>machine data...</div>
+        <div id="twinFields" style="display:none">
+          <div class="twin-field"><div class="tf-key">Handle</div><div class="tf-val c" id="tf-handle">—</div></div>
+          <div class="twin-field"><div class="tf-key">Machine</div><div class="tf-val" id="tf-machine">—</div></div>
+          <div class="twin-field"><div class="tf-key">Year</div><div class="tf-val" id="tf-year">—</div></div>
+          <div class="twin-field"><div class="tf-key">Engine</div><div class="tf-val" id="tf-engine">—</div></div>
+          <div class="twin-field"><div class="tf-key">ECU</div><div class="tf-val c" id="tf-ecu">—</div></div>
+          <div class="twin-field"><div class="tf-key">Suspension</div><div class="tf-val" id="tf-susp">—</div></div>
+          <div class="twin-field"><div class="tf-key">Tires</div><div class="tf-val" id="tf-tires">—</div></div>
+          <div class="twin-field"><div class="tf-key">Class</div><div class="tf-val c" id="tf-class">—</div></div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;background:var(--bg2);border:0.5px solid var(--border2);border-top:1.5px solid var(--judge);padding:10px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.15em;color:var(--judge);text-transform:uppercase;margin-bottom:7px">// AI Judge · Training</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#333;line-height:1.6">Collecting verified session data under UNOST'83 judges.<br><br><span style="color:#2a2a32">Quality-gated, not calendar-based.</span></div>
+        <div style="margin-top:8px;height:2px;background:var(--border);overflow:hidden"><div style="height:100%;width:12%;background:var(--judge)"></div></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#333;margin-top:4px;text-transform:uppercase;letter-spacing:.1em">847 laps · 4 judges</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 3: DASHBOARD
+════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-dash">
+  <div class="nav">
+    <div class="nav-logo">AUTO<em>GRAMM</em></div>
+    <div class="nav-center" id="dash-pilot-label">// Profile</div>
+    <div class="nav-right"><div class="live-dot"></div> LIVE</div>
+  </div>
+
+  <!-- Hero strip -->
+  <div class="dash-hero">
+    <div class="dh-inner">
+      <div class="dh-avatar" id="dash-avatar">?</div>
+      <div class="dh-info">
+        <div class="dh-handle" id="dash-handle">@HANDLE</div>
+        <div class="dh-sub">// VERIFIED AUTOGRAMM™</div>
+        <div class="dh-bio" id="dash-bio">Machine · Track · Rank</div>
+        <div class="dh-tags">
+          <span class="dh-tag c" id="dash-class-tag">GT Class</span>
+          <span class="dh-tag o">Verified Origin</span>
+          <span class="dh-tag">Moscow Raceway</span>
+        </div>
+      </div>
+      <div class="dh-stats">
+        <div class="dh-st"><div class="dh-st-num c" id="dash-bestlap">—</div><div class="dh-st-lbl">Best Lap</div></div>
+        <div class="dh-st"><div class="dh-st-num">1</div><div class="dh-st-lbl">Sessions</div></div>
+        <div class="dh-st"><div class="dh-st-num" id="dash-rank">—</div><div class="dh-st-lbl">GT Rank</div></div>
+      </div>
+    </div>
+    <div class="tstrip">
+      <svg viewBox="0 0 860 32" preserveAspectRatio="none">
+        <polyline points="0,22 40,22 55,7 80,7 95,26 130,26 145,14 180,14 195,24 230,24 245,8 290,8 305,22 340,22 355,4 400,4 415,24 450,24 465,12 500,12 515,26 560,26 575,7 610,7 625,20 660,20 675,10 710,10 725,24 760,24 775,14 820,14 835,22 860,22" fill="none" stroke="#00D4E8" stroke-width="1" opacity=".4"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="dash-shell">
+    <!-- Sidebar -->
+    <div class="dash-sidebar">
+      <div class="dsb-lbl">// Session</div>
+      <div class="dsb-item active" onclick="showPanel('lap',this)">
+        <svg class="dsb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2 10 6 6 9 9 14 4"/></svg>
+        <span class="dsb-text">Lap Data</span>
+        <span class="dsb-badge">NEW</span>
+      </div>
+      <div class="dsb-item" onclick="showPanel('upload',this)">
+        <svg class="dsb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 11V5M5 7l3-3 3 3"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg>
+        <span class="dsb-text">Upload Log</span>
+      </div>
+      <div class="dsb-lbl" style="margin-top:8px">// Machine</div>
+      <div class="dsb-item" onclick="showPanel('garage',this)">
+        <svg class="dsb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="7" width="14" height="7" rx="1"/><path d="M3 7V5a5 5 0 0 1 10 0v2"/><circle cx="5" cy="11" r="1"/><circle cx="11" cy="11" r="1"/></svg>
+        <span class="dsb-text">Garage</span>
+      </div>
+      <div class="dsb-item" onclick="showPanel('lb',this)">
+        <svg class="dsb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="2" x2="8" y2="14"/><line x1="4" y1="6" x2="4" y2="14"/><line x1="12" y1="4" x2="12" y2="14"/></svg>
+        <span class="dsb-text">Leaderboard</span>
+      </div>
+      <div class="dsb-lbl" style="margin-top:8px">// AI</div>
+      <div class="dsb-item" onclick="showPanel('otto',this)">
+        <svg class="dsb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5 8h6M8 5v6"/></svg>
+        <span class="dsb-text">Otto Agent</span>
+        <span class="dsb-badge o">AI</span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="dash-content">
+
+      <!-- LAP -->
+      <div class="panel active" id="panel-lap">
+        <div class="sec-hd">
+          <span class="sec-title">// Lap Analysis · Moscow Raceway · GT</span>
+          <button class="act-btn">Share Card</button>
+        </div>
+        <div class="best-lap">
+          <div class="bl-num" id="panel-bestlap-time">—</div>
+          <div class="bl-track">Moscow Raceway · Full Layout · 2025-03-18</div>
+          <div class="bl-meta">
+            <div class="bl-item"><span class="bl-val">238 km/h</span><span class="bl-key">Top Speed</span></div>
+            <div class="bl-item"><span class="bl-val">1.87g</span><span class="bl-key">Peak G</span></div>
+            <div class="bl-item"><span class="bl-val">Lap 7</span><span class="bl-key">of Session</span></div>
+            <div class="bl-item"><span class="bl-val" style="color:var(--cyan)">92%</span><span class="bl-key">Consistency</span></div>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="stat-card">
+            <div class="sc-val c">+0.633s</div>
+            <div class="sc-lbl">Gap to P1</div>
+            <div class="sc-sub">vs @UNOST83_LEAD</div>
+            <div class="cbar"><div class="cbar-fill" style="width:63%"></div></div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-val" id="panel-rank-card">—</div>
+            <div class="sc-lbl">Global Rank · GT</div>
+            <div class="sc-sub">Moscow Raceway</div>
+            <div class="cbar"><div class="cbar-fill" style="width:96%;background:var(--orange)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPLOAD -->
+      <div class="panel" id="panel-upload">
+        <div class="sec-hd"><span class="sec-title">// Upload Log File</span></div>
+        <div style="background:var(--bg2);border:1px dashed var(--border2);padding:28px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px" onmouseover="this.style.borderColor='rgba(0,212,232,.35)'" onmouseout="this.style.borderColor='var(--border2)'">
+          <div style="font-size:11px;color:#555;margin-bottom:4px">Drop telemetry file here</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#333;letter-spacing:.06em">RaceChrono .CSV · VBOX .VBO</div>
+        </div>
+      </div>
+
+      <!-- GARAGE -->
+      <div class="panel" id="panel-garage">
+        <div class="sec-hd">
+          <span class="sec-title">// Digital Twin · Garage</span>
+          <button class="act-btn">+ Add Car</button>
+        </div>
+        <div class="car-card">
+          <div class="cc-hd">
+            <div class="cc-ico">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4E8" stroke-width="1.5"><path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14l4 4v4a2 2 0 01-2 2h-2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+            </div>
+            <div>
+              <div class="cc-name" id="garage-car-name">BMW M3 E92</div>
+              <div class="cc-sub">Autogramm Verified <span style="font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.08em;padding:1px 4px;background:rgba(0,212,232,.1);border:0.5px solid rgba(0,212,232,.25);color:var(--cyan);margin-left:4px">VERIFIED</span></div>
+            </div>
+          </div>
+          <div class="spec-grid" id="garage-specs">
+            <div class="spec-row"><span class="sk">Engine</span><span class="sv" id="gs-engine">—</span></div>
+            <div class="spec-row"><span class="sk">ECU</span><span class="sv c" id="gs-ecu">—</span></div>
+            <div class="spec-row"><span class="sk">Suspension</span><span class="sv c" id="gs-susp">—</span></div>
+            <div class="spec-row"><span class="sk">Tires</span><span class="sv" id="gs-tires">—</span></div>
+            <div class="spec-row"><span class="sk">Class</span><span class="sv c" id="gs-class">—</span></div>
+            <div class="spec-row"><span class="sk">Track hrs</span><span class="sv">1h</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div class="panel" id="panel-lb">
+        <div class="sec-hd">
+          <span class="sec-title">// Moscow Raceway · GT Class</span>
+          <button class="act-btn">Share My Card</button>
+        </div>
+        <div style="background:var(--bg2);border:0.5px solid #1e1e22;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;padding:7px 10px;border-bottom:0.5px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;color:#333;text-transform:uppercase">
+            <span>Rank · Machine</span><span>Verified Time</span>
+          </div>
+          <div class="lb-row-d">
+            <span class="lbd-pos">01</span>
+            <div class="lbd-machine"><span class="lbd-car">GT-R R35</span><span class="lbd-spec">Haltech Elite 2500 · HKS GT800</span></div>
+            <div style="text-align:right"><div class="lbd-time">1:42.381</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#333">—</div></div>
+          </div>
+          <div class="lb-row-d me" id="lb-my-row">
+            <span class="lbd-pos" id="lb-my-pos">02</span>
+            <div class="lbd-machine"><span class="lbd-car" id="lb-my-car">BMW M3 E92</span><span class="lbd-spec" id="lb-my-spec">KW V3 · MHD Stage 2</span></div>
+            <div style="text-align:right"><div class="lbd-time" id="lb-my-time">1:43.014</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim)">+0.633</div></div>
+          </div>
+          <div class="lb-row-d">
+            <span class="lbd-pos">03</span>
+            <div class="lbd-machine"><span class="lbd-car">GR86</span><span class="lbd-spec">BC Racing · Radium · R888R</span></div>
+            <div style="text-align:right"><div class="lbd-time">1:43.777</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#333">+1.396</div></div>
+          </div>
+          <div class="lb-row-d" style="border-bottom:none">
+            <span class="lbd-pos">04</span>
+            <div class="lbd-machine"><span class="lbd-car">Civic Type R FK8</span><span class="lbd-spec">Mugen Aero · Endless Brakes</span></div>
+            <div style="text-align:right"><div class="lbd-time" style="color:var(--dim)">1:44.220</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#333">+1.839</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OTTO DASH -->
+      <div class="panel" id="panel-otto">
+        <div class="sec-hd"><span class="sec-title">// Otto AI Agent · Your Engineer</span></div>
+        <div class="otto-panel">
+          <div class="op-hd">
+            <div class="op-dot"></div>
+            <span class="op-name">Otto — Online</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#333;margin-left:auto;letter-spacing:.06em">UNOST'83 Knowledge Base</span>
+          </div>
+          <div class="op-msg" id="dash-otto-msg">
+            📊 <strong>Analysis ready.</strong> Digital Twin loaded — I know your build. Ask me anything about setup, tire strategy, or where you're giving time away on Moscow Raceway.
+          </div>
+          <div class="op-actions">
+            <button class="op-btn">Tire pressure +25°C?</button>
+            <button class="op-btn">Compare vs class leader</button>
+            <button class="op-btn">KW V3 setup?</button>
+            <button class="op-btn">What changed vs last session?</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.classList.add('hidden');
+  });
+  const sc = document.getElementById('screen-' + id);
+  sc.classList.remove('hidden');
+  setTimeout(() => sc.classList.add('active'), 10);
+}
+
+function goToLanding() { showScreen('landing'); }
+
+function goToOnboard() {
+  showScreen('onboard');
+  if (!onboardStarted) startOnboard();
+}
+
+function goToDashboard(twin) {
+  populateDashboard(twin);
+  showScreen('dash');
+  flashVerified();
+}
+
+function flashVerified() {
+  const el = document.getElementById('verifiedFlash');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 600);
+}
+
+/* ════════════════════════════════════
+   DASHBOARD PANELS
+════════════════════════════════════ */
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.dsb-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+function populateDashboard(twin) {
+  const handle = twin.handle || '@PILOT';
+  const initials = handle.replace('@','').slice(0,2).toUpperCase();
+  const car = twin.car || 'Unknown Machine';
+  const rank = twin.rank || '#?';
+  const lap = twin.lap || '—';
+  const cls = twin.carClass || 'GT Class';
+  const ecu = twin.ecu || '—';
+  const susp = twin.suspension || '—';
+  const tires = twin.tires || '—';
+  const engine = twin.engine || '—';
+
+  document.getElementById('dash-avatar').textContent = initials;
+  document.getElementById('dash-handle').textContent = handle;
+  document.getElementById('dash-bio').textContent = `${car} · Moscow Raceway · ${cls}`;
+  document.getElementById('dash-class-tag').textContent = cls;
+  document.getElementById('dash-bestlap').textContent = lap;
+  document.getElementById('dash-rank').textContent = rank;
+  document.getElementById('dash-pilot-label').textContent = `// ${handle} · ${car}`;
+  document.getElementById('nav-center-dash');
+
+  document.getElementById('panel-bestlap-time').textContent = lap;
+  document.getElementById('panel-rank-card').textContent = rank;
+
+  document.getElementById('garage-car-name').textContent = car;
+  document.getElementById('gs-engine').textContent = engine;
+  document.getElementById('gs-ecu').textContent = ecu;
+  document.getElementById('gs-susp').textContent = susp;
+  document.getElementById('gs-tires').textContent = tires;
+  document.getElementById('gs-class').textContent = cls;
+
+  document.getElementById('lb-my-car').textContent = car;
+  document.getElementById('lb-my-spec').textContent = `${susp} · ${ecu}`;
+  document.getElementById('lb-my-time').textContent = lap;
+}
+
+/* ════════════════════════════════════
+   OTTO ONBOARDING ENGINE
+════════════════════════════════════ */
+let onboardStarted = false;
+let onboardLoading = false;
+const onboardHistory = [];
+const digitalTwin = {};
+
+const ONBOARD_SYSTEM = `You are Otto, the AI concierge and crew chief for Autogramm — a motorsport verification platform. You are conducting a "Digital Audit" to onboard a new pilot and build their Digital Twin.
+
+YOUR ROLE: Guide the pilot through 4 acts of onboarding via natural conversation. Be direct, technical, and cool — like a proper race engineer, not a customer service bot. No fluff.
+
+THE 4 ACTS:
+ACT 1 — IDENTITY: Ask for their handle (unique username, like @driver_name). Confirm it.
+ACT 2 — DIGITAL TWIN: Collect car info. Ask ONE question at a time:
+  - Make and model (e.g. BMW M3, GT-R R35, GR86)
+  - Year
+  - Engine/power setup
+  - Key mods: ECU tune, suspension, brakes, tires
+  After collecting mods, ASSIGN a class: Stock / Club-Sport / GT / Pro based on modification level.
+ACT 3 — TELEMETRY: Ask if they have a telemetry file ready (.CSV from RaceChrono or .VBO from VBOX). If yes, say great, they can upload it in the dashboard. If no, tell them they can add it later and their machine will be listed as "Unverified" until they do.
+ACT 4 — VERIFIED: Summarize the Digital Twin (handle, car, class). Tell them their machine is being placed in the leaderboard. Say something like their rank will show once telemetry is uploaded. Then say: "DIGITAL TWIN COMPLETE. Launching your dashboard." — this is the signal to transition.
+
+CRITICAL INSTRUCTIONS:
+- Ask ONE thing at a time. Never dump multiple questions.
+- Be specific and technical when confirming data.
+- When you detect the pilot has answered the final question in ACT 4, END your message with the exact phrase: ##LAUNCH_DASHBOARD##
+- Also output a JSON block at key moments to update the twin (the UI will parse this). Format: ##TWIN_UPDATE## {"field":"value"} ##END_UPDATE##
+  - After getting handle: field "handle"
+  - After getting car: field "car"  
+  - After getting year: field "year"
+  - After getting engine: field "engine"
+  - After getting ECU: field "ecu"
+  - After getting suspension: field "suspension"
+  - After getting tires: field "tires"
+  - After assigning class: field "carClass"
+  - Set lap to "1:43.014" and rank to "#02" as a placeholder for the demo.
+
+LANGUAGE: Respond in the same language the pilot writes in. If Russian — be direct and technical in Russian.`;
+
+async function callOttoOnboard(userMsg) {
+  onboardHistory.push({ role: 'user', content: userMsg });
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: ONBOARD_SYSTEM,
+      messages: onboardHistory
+    })
+  });
+  if (!resp.ok) throw new Error('API ' + resp.status);
+  const data = await resp.json();
+  const text = data.content.find(b => b.type === 'text')?.text || '';
+  onboardHistory.push({ role: 'assistant', content: text });
+  return text;
+}
+
+function parseAndUpdateTwin(text) {
+  const matches = text.matchAll(/##TWIN_UPDATE##\s*(\{[^}]+\})\s*##END_UPDATE##/g);
+  for (const match of matches) {
+    try {
+      const update = JSON.parse(match[1]);
+      Object.assign(digitalTwin, update);
+      applyTwinUpdate(update);
+    } catch(e) {}
+  }
+}
+
+function applyTwinUpdate(update) {
+  const card = document.getElementById('twinCard');
+  const empty = document.getElementById('twinEmpty');
+  const fields = document.getElementById('twinFields');
+
+  if (Object.keys(digitalTwin).length > 0) {
+    empty.style.display = 'none';
+    fields.style.display = 'block';
+    card.classList.add('has-data');
+  }
+
+  const map = {
+    handle: 'tf-handle', car: 'tf-machine', year: 'tf-year',
+    engine: 'tf-engine', ecu: 'tf-ecu', suspension: 'tf-susp',
+    tires: 'tf-tires', carClass: 'tf-class'
+  };
+
+  for (const [key, elId] of Object.entries(map)) {
+    if (update[key]) {
+      const el = document.getElementById(elId);
+      if (el) {
+        el.textContent = update[key];
+        el.classList.remove('empty');
+        el.style.animation = 'none';
+        requestAnimationFrame(() => {
+          el.style.animation = 'fadeUp .3s ease forwards';
+        });
+      }
+    }
+  }
+}
+
+function stripDirectives(text) {
+  return text
+    .replace(/##TWIN_UPDATE##[\s\S]*?##END_UPDATE##/g, '')
+    .replace(/##LAUNCH_DASHBOARD##/g, '')
+    .trim();
+}
+
+function detectStep(text) {
+  const t = text.toLowerCase();
+  if (t.includes('handle') || t.includes('никнейм') || t.includes('позывной')) return 1;
+  if (t.includes('make') || t.includes('model') || t.includes('марка') || t.includes('модель') || t.includes('car') || t.includes('machine') || t.includes('машин') || t.includes('ecu') || t.includes('suspension') || t.includes('подвеск') || t.includes('tires') || t.includes('шин') || t.includes('engine') || t.includes('двигател') || t.includes('class') || t.includes('класс')) return 2;
+  if (t.includes('telemetry') || t.includes('телеметр') || t.includes('.csv') || t.includes('.vbo') || t.includes('log') || t.includes('лог')) return 3;
+  if (t.includes('dashboard') || t.includes('launch') || t.includes('дашборд') || t.includes('verified') || t.includes('верифицир')) return 4;
+  return null;
+}
+
+function updateProgress(step) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('ps-' + i);
+    el.classList.remove('active','done','locked');
+    if (i < step) el.classList.add('done');
+    else if (i === step) el.classList.add('active');
+    else el.classList.add('locked');
+  }
+  const labels = ['// Step 1 of 4 — Identity','// Step 2 of 4 — Digital Twin','// Step 3 of 4 — Telemetry','// Step 4 of 4 — Verified'];
+  document.getElementById('onboard-step-label').textContent = labels[step-1] || labels[0];
+}
+
+function addOnboardMsg(role, rawText, withChips = []) {
+  const feed = document.getElementById('onboardFeed');
+  const cleanText = stripDirectives(rawText);
+  if (!cleanText && !withChips.length) return;
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.style.opacity = '0';
+
+  const meta = role === 'user' ? 'YOU' : 'OTTO';
+  div.innerHTML = `<div class="msg-meta">${meta}</div><div class="msg-bubble">${cleanText.replace(/\n/g,'<br>')}</div>`;
+
+  if (withChips.length) {
+    const chips = document.createElement('div');
+    chips.className = 'chips';
+    withChips.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.textContent = c;
+      btn.onclick = () => { chips.remove(); sendOnboardChip(c); };
+      chips.appendChild(btn);
+    });
+    div.appendChild(chips);
+  }
+
+  feed.appendChild(div);
+  requestAnimationFrame(() => {
+    div.style.transition = 'opacity .3s ease, transform .3s ease';
+    div.style.transform = role === 'user' ? 'translateX(6px)' : 'translateX(-6px)';
+    requestAnimationFrame(() => { div.style.opacity='1'; div.style.transform='translateX(0)'; });
+  });
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function setOnboardLoading(v) {
+  onboardLoading = v;
+  document.getElementById('onboardSendBtn').disabled = v;
+  const t = document.getElementById('onboardTyping');
+  t.classList.toggle('active', v);
+  if (v) document.getElementById('onboardFeed').scrollTop = 9999;
+}
+
+async function startOnboard() {
+  onboardStarted = true;
+  setOnboardLoading(true);
+  try {
+    const reply = await callOttoOnboard('START_ONBOARDING');
+    setOnboardLoading(false);
+    addOnboardMsg('otto', reply);
+    const step = detectStep(reply);
+    if (step) updateProgress(step);
+  } catch(e) {
+    setOnboardLoading(false);
+    addOnboardMsg('otto', 'Connection error. Check network.');
+  }
+}
+
+async function processOnboardReply(userText) {
+  if (onboardLoading) return;
+  addOnboardMsg('user', userText);
+  setOnboardLoading(true);
+  try {
+    const reply = await callOttoOnboard(userText);
+    parseAndUpdateTwin(reply);
+    setOnboardLoading(false);
+    const cleanReply = stripDirectives(reply);
+
+    // Check for launch
+    if (reply.includes('##LAUNCH_DASHBOARD##')) {
+      addOnboardMsg('otto', cleanReply);
+      setTimeout(() => goToDashboard(digitalTwin), 1800);
+      return;
+    }
+
+    addOnboardMsg('otto', cleanReply);
+    const step = detectStep(reply);
+    if (step) updateProgress(step);
+  } catch(e) {
+    setOnboardLoading(false);
+    addOnboardMsg('otto', 'Error: ' + e.message);
+  }
+}
+
+function onboardSend() {
+  const input = document.getElementById('onboardInput');
+  const text = input.value.trim();
+  if (!text || onboardLoading) return;
+  input.value = '';
+  processOnboardReply(text);
+}
+
+function sendOnboardChip(text) { processOnboardReply(text); }
+
+document.getElementById('onboardInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); onboardSend(); }
+});
+</script>
+</body>
+</html>
