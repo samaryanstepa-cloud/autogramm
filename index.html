@@ -1,0 +1,3052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AUTOGRAMM — Leave Your Trace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════
+   TOKENS
+═══════════════════════════════════ */
+:root {
+  --bg:    #08080A;
+  --bg2:   #0d0d0f;
+  --bg3:   #111113;
+  --cyan:  #00D4E8;
+  --orange:#FF5733;
+  --judge: #8B5CF6;
+  --ghost: #E5E5E5;
+  --dim:   #555566;
+  --b1:    #1a1a1e;
+  --b2:    #2a2a32;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+html { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg);
+  font-family: 'Barlow', sans-serif;
+  color: var(--ghost);
+  height: 100%;
+  overflow: hidden;
+  /* scanlines */
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.04) 2px, rgba(0,0,0,.04) 4px);
+  pointer-events: none; z-index: 9999;
+}
+
+/* ═══════════════════════════════════
+   SCREEN SYSTEM
+═══════════════════════════════════ */
+.screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  transition: opacity .4s ease, transform .4s ease;
+  overflow: hidden;
+  will-change: opacity, transform;
+}
+.screen.hidden  { opacity: 0; pointer-events: none; transform: translateY(16px); }
+.screen.active  { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+/* ═══════════════════════════════════
+   SHARED NAV
+═══════════════════════════════════ */
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--b1);
+  background: var(--bg);
+  flex-shrink: 0; z-index: 10;
+  min-height: 44px;
+}
+.nav-logo {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .28em; color: var(--cyan);
+  text-transform: uppercase;
+}
+.nav-logo em { color: #333; font-style: normal; }
+.nav-right {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .1em; color: var(--dim);
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+/* ═══════════════════════════════════
+   SCREEN 1 — LANDING (MOBILE FIRST)
+═══════════════════════════════════ */
+#screen-landing { background: var(--bg); }
+
+.land-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.land-scroll::-webkit-scrollbar { display: none; }
+
+/* grid bg */
+.land-grid {
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,232,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,232,.018) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none; z-index: 0;
+}
+.land-glow {
+  position: absolute;
+  width: 340px; height: 340px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,212,232,.07) 0%, transparent 65%);
+  top: -60px; left: -80px;
+  pointer-events: none;
+}
+
+.land-hero {
+  position: relative; z-index: 2;
+  padding: 32px 20px 24px;
+}
+.land-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .22em; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: 18px;
+  opacity: 0; animation: fadeUp .5s ease forwards .1s;
+}
+.land-h1 {
+  font-family: 'Chakra Petch', monospace;
+  font-size: clamp(38px, 11vw, 56px);
+  font-weight: 700; line-height: 1.0;
+  letter-spacing: .02em; text-transform: uppercase;
+  opacity: 0; animation: fadeUp .5s ease forwards .2s;
+}
+.land-h1 span { color: var(--cyan); }
+.land-sub {
+  margin-top: 16px;
+  font-size: 13px; line-height: 1.7; color: #666;
+  max-width: 340px;
+  opacity: 0; animation: fadeUp .5s ease forwards .35s;
+}
+.land-sub strong { color: #888; font-weight: 500; }
+
+.land-cta-col {
+  margin-top: 28px; display: flex; flex-direction: column; gap: 10px;
+  opacity: 0; animation: fadeUp .5s ease forwards .5s;
+}
+.btn-primary {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 12px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: #08080A;
+  background: var(--cyan); border: none;
+  padding: 16px 24px; cursor: pointer;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  transition: box-shadow .2s, transform .1s;
+  width: 100%; text-align: center; display: block;
+  position: relative; overflow: hidden;
+}
+.btn-primary::before {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(255,255,255,.15);
+  transform: translateX(-100%); transition: transform .3s;
+}
+.btn-primary:active { transform: scale(.98); }
+.btn-primary:hover::before { transform: translateX(0); }
+.btn-ghost {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--dim); background: transparent;
+  border: 0.5px solid var(--b2);
+  padding: 14px 20px; cursor: pointer;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  transition: all .2s; width: 100%; text-align: center;
+}
+.btn-ghost:active { color: var(--ghost); border-color: #444; }
+
+.land-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--b1);
+  margin: 28px 20px 0;
+  opacity: 0; animation: fadeUp .5s ease forwards .65s;
+}
+.ls-block {
+  background: var(--bg); padding: 14px 10px; text-align: center;
+}
+.ls-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px; font-weight: 700; color: var(--ghost);
+  font-variant-numeric: tabular-nums;
+}
+.ls-num.c { color: var(--cyan); }
+.ls-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .12em; color: var(--dim);
+  text-transform: uppercase; margin-top: 3px;
+}
+
+/* leaderboard preview card */
+.lb-preview {
+  margin: 20px;
+  background: var(--bg2);
+  border: 0.5px solid var(--b2); border-top: 2px solid var(--cyan);
+  opacity: 0; animation: fadeUp .5s ease forwards .8s;
+}
+.lbp-hd {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 12px; border-bottom: 0.5px solid var(--b1);
+}
+.lbp-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .16em; color: var(--dim); text-transform: uppercase;
+}
+.lbp-live {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .1em; color: var(--cyan); text-transform: uppercase;
+}
+.lb-row {
+  display: grid; grid-template-columns: 26px 1fr auto;
+  gap: 0 8px; align-items: center;
+  padding: 10px 12px; border-bottom: 0.5px solid #0c0c0e;
+  cursor: pointer; transition: background .15s;
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-row:active { background: #0f0f12; }
+.lb-row.me { background: rgba(0,212,232,.04); border-left: 2px solid var(--cyan); }
+.lb-pos {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--dim); text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.lb-row.me .lb-pos { color: var(--cyan); }
+.lb-car {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 12px; font-weight: 600; color: var(--ghost);
+}
+.lb-row.me .lb-car { color: var(--cyan); }
+.lb-spec {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: #2a2a32; letter-spacing: .03em;
+  margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lb-time-col { text-align: right; }
+.lb-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 700; color: var(--ghost);
+  font-variant-numeric: tabular-nums;
+}
+.lb-row.me .lb-time { color: var(--cyan); }
+.lb-delta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: #333; font-variant-numeric: tabular-nums;
+}
+.lbp-foot {
+  padding: 10px 12px; text-align: center; cursor: pointer;
+}
+.lbp-foot-t {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--cyan); letter-spacing: .08em; text-transform: uppercase;
+}
+
+/* telem strip */
+.telem-strip {
+  height: 24px; margin: 0 20px 24px;
+  opacity: 0; animation: fadeUp .5s ease forwards .9s;
+}
+.telem-strip svg { width: 100%; height: 100%; display: block; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ═══════════════════════════════════
+   SCREEN 2 — OTTO ONBOARDING
+═══════════════════════════════════ */
+#screen-onboard { background: var(--bg); }
+
+/* progress strip — replaces sidebar on mobile */
+.progress-strip {
+  flex-shrink: 0;
+  background: var(--bg);
+  border-bottom: 0.5px solid var(--b1);
+  padding: 0 16px;
+  overflow: hidden;
+}
+.ps-inner {
+  display: flex; gap: 0;
+  position: relative;
+}
+.ps-step {
+  flex: 1; padding: 10px 0;
+  display: flex; flex-direction: column; align-items: center;
+  position: relative; cursor: default;
+}
+.ps-step::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--b2);
+  transition: background .3s;
+}
+.ps-step.active::after  { background: var(--orange); }
+.ps-step.done::after    { background: var(--cyan); }
+.ps-step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: #333; letter-spacing: .1em;
+  margin-bottom: 2px; transition: color .3s;
+}
+.ps-step.active .ps-step-num { color: var(--orange); }
+.ps-step.done   .ps-step-num { color: var(--cyan); }
+.ps-step-label {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 9px; font-weight: 600; color: #333;
+  text-transform: uppercase; letter-spacing: .04em;
+  transition: color .3s;
+}
+.ps-step.active .ps-step-label { color: var(--ghost); }
+.ps-step.done   .ps-step-label { color: #3a3a42; }
+
+/* twin preview — horizontal pill below chat on mobile */
+.twin-pill {
+  flex-shrink: 0;
+  background: var(--bg);
+  border-top: 0.5px solid var(--b1);
+  padding: 10px 16px;
+  display: flex; gap: 10px; align-items: center;
+  overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.twin-pill::-webkit-scrollbar { display: none; }
+.twin-pill-empty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: #2a2a32; letter-spacing: .08em;
+  white-space: nowrap;
+}
+.twin-chip {
+  flex-shrink: 0;
+  background: var(--bg3);
+  border: 0.5px solid var(--b2);
+  padding: 6px 10px;
+  scroll-snap-align: start;
+  min-width: 0;
+}
+.twin-chip-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; letter-spacing: .1em; color: var(--dim);
+  text-transform: uppercase; margin-bottom: 2px;
+}
+.twin-chip-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--ghost); white-space: nowrap;
+}
+.twin-chip-val.c { color: var(--cyan); }
+
+/* Otto chat */
+.otto-chat {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden; background: var(--bg2); min-height: 0;
+}
+.otto-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-bottom: 0.5px solid var(--b1);
+  background: var(--bg); flex-shrink: 0;
+}
+.otto-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--orange); box-shadow: 0 0 8px var(--orange);
+  animation: blink 2s ease-in-out infinite;
+}
+.otto-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .16em; color: var(--orange); text-transform: uppercase;
+}
+.otto-kb {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: #2a2a32; letter-spacing: .04em; margin-left: auto;
+}
+
+.chat-feed {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 14px 14px 4px;
+  display: flex; flex-direction: column; gap: 10px;
+  scroll-behavior: smooth; min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+.chat-feed::-webkit-scrollbar { width: 2px; }
+.chat-feed::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
+
+.msg { display: flex; flex-direction: column; gap: 2px; max-width: 88%; }
+.msg.user { align-self: flex-end; align-items: flex-end; }
+.msg.otto { align-self: flex-start; align-items: flex-start; }
+.msg-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; letter-spacing: .1em; color: #2a2a32; text-transform: uppercase;
+}
+.msg.otto .msg-meta { color: rgba(255,87,51,.35); }
+.msg-bubble {
+  padding: 10px 12px; font-size: 13px; line-height: 1.65; color: #aaa;
+}
+.msg.user .msg-bubble {
+  background: rgba(0,212,232,.07);
+  border: 0.5px solid rgba(0,212,232,.18); color: var(--ghost);
+  clip-path: polygon(0% 0%, calc(100% - 6px) 0%, 100% 6px, 100% 100%, 0% 100%);
+}
+.msg.otto .msg-bubble {
+  background: var(--bg3);
+  border: 0.5px solid var(--b2); border-left: 2px solid var(--orange);
+}
+.msg.otto .msg-bubble strong { color: var(--ghost); }
+
+/* chips */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; align-self: flex-start; }
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .05em;
+  padding: 7px 12px;
+  border: 0.5px solid var(--b2); color: var(--dim);
+  cursor: pointer; transition: all .15s;
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+.chip:active { border-color: rgba(255,87,51,.35); color: var(--ghost); background: rgba(255,87,51,.07); }
+
+/* typing */
+.typing-wrap {
+  display: none; align-self: flex-start;
+  padding: 10px 14px; margin: 0 14px;
+  background: var(--bg3);
+  border: 0.5px solid var(--b2); border-left: 2px solid var(--orange);
+  align-items: center; gap: 5px;
+}
+.typing-wrap.active { display: flex; }
+.t-dot {
+  width: 4px; height: 4px; border-radius: 50%; background: var(--orange);
+  opacity: .3; animation: tdot 1.2s ease-in-out infinite;
+}
+.t-dot:nth-child(2){animation-delay:.15s} .t-dot:nth-child(3){animation-delay:.3s}
+@keyframes tdot { 0%,80%,100%{opacity:.2;transform:scale(.9)} 40%{opacity:1;transform:scale(1.1)} }
+
+/* input */
+.input-area {
+  border-top: 0.5px solid var(--b1);
+  padding: 10px 12px calc(10px + var(--safe-bottom));
+  background: var(--bg);
+  display: flex; gap: 0; flex-shrink: 0;
+}
+.chat-input {
+  flex: 1; background: var(--bg3);
+  border: 0.5px solid var(--b2); border-right: none;
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--ghost); outline: none;
+  letter-spacing: .04em; transition: border-color .2s;
+  border-radius: 0; -webkit-appearance: none;
+  /* prevent iOS zoom */
+  font-size: max(13px, 16px);
+}
+.chat-input::placeholder { color: #2a2a32; }
+.chat-input:focus { border-color: rgba(255,87,51,.25); }
+.send-btn {
+  background: var(--orange); border: none;
+  padding: 0 18px; cursor: pointer;
+  clip-path: polygon(0% 0%, calc(100% - 5px) 0%, 100% 5px, 100% 100%, 0% 100%);
+  transition: box-shadow .2s; flex-shrink: 0;
+  min-width: 48px;
+}
+.send-btn:active { box-shadow: 0 0 16px rgba(255,87,51,.4); }
+.send-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+/* ═══════════════════════════════════
+   SCREEN 3 — DASHBOARD
+═══════════════════════════════════ */
+#screen-dash { background: var(--bg); }
+
+/* hero strip — compact on mobile */
+.dash-hero {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--bg) 0%, #0f0f12 100%);
+  padding: 14px 16px 0;
+  border-bottom: 0.5px solid var(--b1);
+  position: relative; overflow: hidden;
+}
+.dash-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,232,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,232,.02) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none;
+}
+.dh-row1 {
+  display: flex; gap: 12px; align-items: flex-start;
+  position: relative; z-index: 1;
+}
+.dh-avatar {
+  width: 52px; height: 52px;
+  background: #1a1a1e; border: 1.5px solid var(--cyan);
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Chakra Petch', monospace;
+  font-size: 16px; font-weight: 700; color: var(--cyan);
+  flex-shrink: 0; position: relative;
+}
+.dh-avatar::after {
+  content: '✓ VERIFIED';
+  position: absolute; bottom: -7px; left: 50%; transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .1em;
+  color: #08080A; background: var(--cyan); padding: 2px 5px; white-space: nowrap;
+  clip-path: polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%);
+}
+.dh-info { flex: 1; min-width: 0; padding-top: 1px; }
+.dh-handle {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 18px; font-weight: 700; letter-spacing: .04em;
+  color: var(--ghost); line-height: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dh-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--cyan); letter-spacing: .1em; margin-top: 3px;
+}
+.dh-bio { font-size: 11px; color: #555; margin-top: 4px; }
+.dh-tags { display: flex; gap: 5px; margin-top: 7px; flex-wrap: wrap; }
+.dh-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .08em;
+  padding: 2px 7px; border: 0.5px solid #2a2a30; color: #666; text-transform: uppercase;
+}
+.dh-tag.c { border-color: rgba(0,212,232,.3); color: var(--cyan); }
+.dh-tag.o { border-color: rgba(255,87,51,.3); color: var(--orange); }
+
+.dh-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--b1);
+  margin: 14px -16px 0; position: relative; z-index: 1;
+}
+.dh-st { background: var(--bg); padding: 10px 8px; text-align: center; }
+.dh-st-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px; font-weight: 700; color: var(--ghost);
+  font-variant-numeric: tabular-nums;
+}
+.dh-st-num.c { color: var(--cyan); }
+.dh-st-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; letter-spacing: .1em; color: #555;
+  text-transform: uppercase; margin-top: 2px;
+}
+.tstrip { height: 24px; position: relative; z-index: 1; }
+.tstrip svg { width: 100%; height: 100%; }
+
+/* bottom nav — replaces sidebar on mobile */
+.dash-bottom-nav {
+  flex-shrink: 0;
+  background: var(--bg);
+  border-top: 0.5px solid var(--b1);
+  display: flex;
+  padding-bottom: var(--safe-bottom);
+}
+.bn-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+  padding: 10px 4px;
+  cursor: pointer; transition: background .15s;
+  border-top: 2px solid transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+.bn-item.active { border-top-color: var(--cyan); }
+.bn-icon { width: 18px; height: 18px; color: #444; }
+.bn-item.active .bn-icon { color: var(--cyan); }
+.bn-item.otto-nav .bn-icon { color: #444; }
+.bn-item.otto-nav.active .bn-icon { color: var(--orange); }
+.bn-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .06em; color: #444;
+  text-transform: uppercase;
+}
+.bn-item.active .bn-label { color: var(--ghost); }
+.bn-item.otto-nav.active .bn-label { color: var(--orange); }
+.bn-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 7px;
+  padding: 1px 4px; background: rgba(0,212,232,.12);
+  color: var(--cyan); border-radius: 2px; line-height: 1.4;
+}
+.bn-badge.o { background: rgba(255,87,51,.12); color: var(--orange); }
+
+/* dash content */
+.dash-content {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 14px; -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+.dash-content::-webkit-scrollbar { width: 2px; }
+.dash-content::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* shared dash components */
+.sec-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.sec-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; color: #555; text-transform: uppercase;
+}
+.act-btn {
+  font-family: 'Chakra Petch', monospace; font-size: 9px; letter-spacing: .1em;
+  color: var(--cyan); background: rgba(0,212,232,.07);
+  border: 0.5px solid rgba(0,212,232,.2);
+  padding: 6px 12px; cursor: pointer;
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  text-transform: uppercase;
+}
+
+/* best lap block */
+.best-lap {
+  background: var(--bg2); border: 0.5px solid #1e1e22;
+  border-top: 1.5px solid var(--cyan);
+  padding: 12px; margin-bottom: 10px; position: relative; overflow: hidden;
+}
+.best-lap::before {
+  content: 'BEST LAP'; position: absolute; top: 7px; right: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .18em; color: #222;
+}
+.bl-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 30px; font-weight: 700; color: var(--cyan);
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.bl-track {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: #555; letter-spacing: .08em;
+  margin-top: 2px; text-transform: uppercase;
+}
+.bl-meta { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+.bl-item { display: flex; flex-direction: column; gap: 2px; }
+.bl-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 700; color: var(--ghost); font-variant-numeric: tabular-nums;
+}
+.bl-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: #444; letter-spacing: .08em; text-transform: uppercase;
+}
+
+/* stat cards */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+.stat-card { background: var(--bg2); border: 0.5px solid #1e1e22; padding: 10px; }
+.sc-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px; font-weight: 700; color: var(--ghost); font-variant-numeric: tabular-nums;
+}
+.sc-val.c { color: var(--cyan); }
+.sc-val.o { color: var(--orange); }
+.sc-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .08em; color: #444; text-transform: uppercase; margin-top: 2px;
+}
+.sc-sub { font-size: 10px; color: #333; margin-top: 3px; }
+.cbar { margin-top: 6px; height: 3px; background: #1a1a1e; border-radius: 2px; overflow: hidden; }
+.cbar-fill { height: 100%; background: var(--cyan); border-radius: 2px; }
+
+/* ═══════════════════════════════════
+   GARAGE — MULTI-CAR SYSTEM
+═══════════════════════════════════ */
+
+/* fleet stats bar */
+.fleet-bar {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 1px; background: var(--b1); margin-bottom: 12px;
+}
+.fb-block { background: var(--bg); padding: 8px 6px; text-align: center; }
+.fb-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.fb-num.track   { color: var(--cyan); }
+.fb-num.street  { color: #7FDBCA; }
+.fb-num.heritage{ color: #C4A84F; }
+.fb-num.project { color: var(--orange); }
+.fb-lbl { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .1em; color: #444; text-transform: uppercase; margin-top: 2px; }
+
+/* filter tabs */
+.garage-filters {
+  display: flex; gap: 0; overflow-x: auto; margin-bottom: 12px;
+  -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;
+}
+.garage-filters::-webkit-scrollbar { display: none; }
+.gf-tab {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 7px 14px; border: 0.5px solid var(--b2); color: #444;
+  cursor: pointer; white-space: nowrap; background: transparent;
+  scroll-snap-align: start; flex-shrink: 0;
+  transition: all .15s; border-right: none;
+}
+.gf-tab:last-child { border-right: 0.5px solid var(--b2); }
+.gf-tab.active { color: var(--ghost); background: var(--bg2); }
+.gf-tab.track.active   { border-bottom: 2px solid var(--cyan); }
+.gf-tab.street.active  { border-bottom: 2px solid #7FDBCA; }
+.gf-tab.heritage.active{ border-bottom: 2px solid #C4A84F; }
+.gf-tab.project.active { border-bottom: 2px solid var(--orange); }
+.gf-tab.all.active     { border-bottom: 2px solid var(--ghost); }
+
+/* 2×grid — REPLACED with swipe carousel */
+.garage-grid { display: none; }
+
+/* ── SWIPE CAROUSEL ── */
+.garage-carousel {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+.gc-track {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 0;
+}
+.gc-track::-webkit-scrollbar { display: none; }
+
+.gc-slide {
+  flex: 0 0 88vw;
+  max-width: 380px;
+  scroll-snap-align: center;
+  padding: 10px 7px;
+  display: flex;
+  flex-direction: column;
+}
+/* first and last padding so first/last card centers */
+.gc-track::before,
+.gc-track::after {
+  content: '';
+  flex: 0 0 6vw;
+  min-width: 6px;
+}
+
+/* the card itself */
+.gc-card {
+  flex: 1;
+  background: var(--bg2);
+  border: 0.5px solid #1e1e22;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: border-color .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.gc-card:active { border-color: var(--b2); }
+.gc-card.active-car { border-color: rgba(0,212,232,.3); }
+
+/* type stripe top */
+.gc-stripe {
+  height: 3px;
+  flex-shrink: 0;
+}
+.gc-card.track   .gc-stripe { background: var(--cyan); }
+.gc-card.street  .gc-stripe { background: #7FDBCA; }
+.gc-card.heritage .gc-stripe { background: linear-gradient(90deg,#C4A84F,#F0D080,#C4A84F); }
+.gc-card.project  .gc-stripe { background: var(--orange); }
+
+.gc-inner { padding: 14px; flex: 1; display: flex; flex-direction: column; }
+
+/* type + status row */
+.gc-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.gc-type-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .18em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 5px;
+}
+.gc-card.track   .gc-type-lbl { color: var(--cyan); }
+.gc-card.street  .gc-type-lbl { color: #7FDBCA; }
+.gc-card.heritage .gc-type-lbl { color: #C4A84F; }
+.gc-card.project  .gc-type-lbl { color: var(--orange); }
+.gc-sdot {
+  width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+}
+.gc-sdot.verified { background: var(--cyan); box-shadow: 0 0 5px var(--cyan); }
+.gc-sdot.pending  { background: var(--orange); opacity: .7; }
+.gc-sdot.building { background: var(--orange); animation: blink 1.5s infinite; }
+.gc-sdot.none     { background: #333; }
+
+.gc-active-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 2px 6px; background: rgba(0,212,232,.1);
+  color: var(--cyan); border: 0.5px solid rgba(0,212,232,.25);
+}
+
+/* car name */
+.gc-name {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 24px; font-weight: 700; color: var(--ghost);
+  line-height: 1.05; letter-spacing: .02em;
+}
+.gc-year {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: #555; margin-top: 3px; letter-spacing: .06em;
+}
+
+/* main stat — big number */
+.gc-stat { margin-top: auto; padding-top: 20px; }
+.gc-stat-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 38px; font-weight: 700; font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.gc-card.track   .gc-stat-val { color: var(--cyan); }
+.gc-card.street  .gc-stat-val { color: #7FDBCA; }
+.gc-card.heritage .gc-stat-val { color: #C4A84F; }
+.gc-card.project  .gc-stat-val { color: var(--orange); }
+.gc-stat-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .14em; color: #444;
+  text-transform: uppercase; margin-top: 4px;
+}
+
+/* sub-info row: class + detail */
+.gc-sub-row {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-top: 14px; padding-top: 10px;
+  border-top: 0.5px solid var(--b1);
+}
+.gc-class {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: .06em;
+}
+.gc-detail {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: #555; text-align: right;
+}
+
+/* build bar (project) */
+.gc-build { margin-top: 10px; }
+.gc-build-bar { height: 2px; background: var(--b1); border-radius: 2px; overflow: hidden; }
+.gc-build-fill { height: 100%; background: var(--orange); border-radius: 2px; }
+.gc-build-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: #555; letter-spacing: .06em; margin-top: 3px;
+  display: flex; justify-content: space-between;
+}
+
+/* authenticity bar (heritage) */
+.gc-auth { margin-top: 10px; }
+.gc-auth-bar { height: 2px; background: var(--b1); border-radius: 2px; overflow: hidden; }
+.gc-auth-fill { height: 100%; background: #C4A84F; border-radius: 2px; }
+
+/* telem sparkline on track cards */
+.gc-spark { margin-top: 10px; height: 28px; }
+.gc-spark svg { width: 100%; height: 100%; display: block; }
+
+/* specs preview (2 rows) */
+.gc-specs-peek {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  margin-top: 12px; border-top: 0.5px solid var(--b1); padding-top: 10px;
+}
+.gsp-item { padding: 0 0 7px; display: flex; flex-direction: column; gap: 2px; }
+.gsp-item:nth-child(odd)  { padding-right: 10px; }
+.gsp-item:nth-child(even) { padding-left: 10px; border-left: 0.5px solid #141416; }
+.gsp-k { font-family: 'JetBrains Mono', monospace; font-size: 7px; color: #444; letter-spacing: .1em; text-transform: uppercase; }
+.gsp-v { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ghost); }
+.gsp-v.c { color: var(--cyan); }
+
+/* tap hint */
+.gc-tap-hint {
+  text-align: center; padding: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; letter-spacing: .1em; color: #2a2a32; text-transform: uppercase;
+  border-top: 0.5px solid var(--b1);
+}
+
+/* pagination dots */
+.gc-dots {
+  display: flex; justify-content: center; align-items: center;
+  gap: 5px; padding: 8px 0 4px; flex-shrink: 0;
+}
+.gc-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--b2); transition: all .25s;
+  flex-shrink: 0;
+}
+.gc-dot.active { width: 16px; border-radius: 2px; }
+.gc-dot.track.active   { background: var(--cyan); }
+.gc-dot.street.active  { background: #7FDBCA; }
+.gc-dot.heritage.active{ background: #C4A84F; }
+.gc-dot.project.active { background: var(--orange); }
+.gc-dot.all.active     { background: var(--ghost); }
+
+/* car tile */
+.car-tile {
+  background: var(--bg2); border: 0.5px solid #1e1e22;
+  padding: 10px; cursor: pointer; position: relative; overflow: hidden;
+  transition: border-color .2s, background .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.car-tile:active { background: #101012; }
+.car-tile.hidden { display: none; }
+/* type top accent */
+.car-tile::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.car-tile.track::before   { background: var(--cyan); }
+.car-tile.street::before  { background: #7FDBCA; }
+.car-tile.heritage::before{ background: #C4A84F; }
+.car-tile.project::before { background: var(--orange); }
+.car-tile.active-car { border-color: rgba(0,212,232,.35); background: rgba(0,212,232,.03); }
+
+/* tile header */
+.ct-type-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; letter-spacing: .14em; text-transform: uppercase;
+  margin-bottom: 6px; display: flex; align-items: center; gap: 5px;
+}
+.ct-type-badge.track   { color: var(--cyan); }
+.ct-type-badge.street  { color: #7FDBCA; }
+.ct-type-badge.heritage{ color: #C4A84F; }
+.ct-type-badge.project { color: var(--orange); }
+.ct-status-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.ct-status-dot.verified { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+.ct-status-dot.pending  { background: var(--orange); opacity: .7; }
+.ct-status-dot.none     { background: #333; }
+.ct-status-dot.building { background: var(--orange); animation: blink 1.5s infinite; }
+
+.ct-name {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 12px; font-weight: 700; color: var(--ghost);
+  line-height: 1.2; margin-bottom: 2px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.ct-year {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: #555; margin-bottom: 7px;
+}
+/* tile stat */
+.ct-stat {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+.ct-stat-val { font-size: 13px; font-weight: 700; line-height: 1; }
+.ct-stat-val.track   { color: var(--cyan); }
+.ct-stat-val.heritage{ color: #C4A84F; }
+.ct-stat-val.project { color: var(--orange); }
+.ct-stat-val.street  { color: #7FDBCA; }
+.ct-stat-key { font-size: 7px; letter-spacing: .1em; color: #444; text-transform: uppercase; margin-top: 2px; }
+
+/* build progress (project) */
+.ct-build-bar { margin-top: 7px; height: 2px; background: #1a1a1e; border-radius: 2px; overflow: hidden; }
+.ct-build-fill { height: 100%; background: var(--orange); border-radius: 2px; transition: width .6s ease; }
+
+/* authenticity meter (heritage) */
+.ct-auth { display: flex; align-items: center; gap: 5px; margin-top: 7px; }
+.ct-auth-bar { flex: 1; height: 2px; background: #1a1a1e; border-radius: 2px; overflow: hidden; }
+.ct-auth-fill { height: 100%; background: #C4A84F; border-radius: 2px; }
+.ct-auth-val { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #C4A84F; flex-shrink: 0; }
+
+/* active car chip on dashboard hero */
+.dh-car-select {
+  display: flex; gap: 5px; overflow-x: auto; margin-top: 10px; padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;
+}
+.dh-car-select::-webkit-scrollbar { display: none; }
+.dh-cs-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .06em;
+  padding: 4px 10px; border: 0.5px solid var(--b2); color: #444;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  scroll-snap-align: start; background: transparent; transition: all .15s;
+  clip-path: polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+}
+.dh-cs-chip.active { border-color: rgba(0,212,232,.35); color: var(--cyan); background: rgba(0,212,232,.06); }
+
+/* ═══════════════════════════════════
+   CAR DETAIL BOTTOM SHEET
+═══════════════════════════════════ */
+.car-sheet-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  z-index: 700; opacity: 0; pointer-events: none; transition: opacity .3s;
+}
+.car-sheet-backdrop.open { opacity: 1; pointer-events: all; }
+.car-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg); border-top: 1px solid var(--b2);
+  z-index: 710; max-height: 85vh; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateY(100%); transition: transform .35s cubic-bezier(.32,.72,0,1);
+}
+.car-sheet.open { transform: translateY(0); }
+.car-sheet::-webkit-scrollbar { display: none; }
+
+/* sheet handle */
+.cs-handle { display: flex; justify-content: center; padding: 10px 0 4px; flex-shrink: 0; }
+.cs-handle-bar { width: 36px; height: 4px; background: var(--b2); border-radius: 2px; }
+
+/* sheet top accent by type */
+.cs-accent-line { height: 2px; width: 100%; }
+.cs-accent-line.track   { background: var(--cyan); }
+.cs-accent-line.street  { background: #7FDBCA; }
+.cs-accent-line.heritage{ background: linear-gradient(90deg,#C4A84F,#F0D080,#C4A84F); }
+.cs-accent-line.project { background: var(--orange); }
+
+.cs-body { padding: 12px 16px calc(24px + env(safe-area-inset-bottom,0px)); }
+
+.cs-hd {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.cs-name {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 22px; font-weight: 700; color: var(--ghost); line-height: 1.1;
+}
+.cs-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: #555; margin-top: 3px;
+}
+.cs-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em;
+  padding: 4px 10px; text-transform: uppercase; flex-shrink: 0; margin-top: 2px;
+}
+.cs-badge.track   { background: rgba(0,212,232,.1);  color: var(--cyan);  border: 0.5px solid rgba(0,212,232,.3); }
+.cs-badge.street  { background: rgba(127,219,202,.1);color: #7FDBCA;      border: 0.5px solid rgba(127,219,202,.3); }
+.cs-badge.heritage{ background: rgba(196,168,79,.1); color: #C4A84F;      border: 0.5px solid rgba(196,168,79,.35); }
+.cs-badge.project { background: rgba(255,87,51,.1);  color: var(--orange); border: 0.5px solid rgba(255,87,51,.3); }
+
+.cs-section-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; letter-spacing: .2em; color: var(--dim); text-transform: uppercase;
+  margin: 14px 0 8px; padding-bottom: 5px; border-bottom: 0.5px solid var(--b1);
+}
+
+/* spec table */
+.cs-spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.cs-spec-row { padding: 8px 0; border-bottom: 0.5px solid #141416; display: flex; flex-direction: column; gap: 2px; }
+.cs-spec-row:nth-child(odd)  { padding-right: 12px; }
+.cs-spec-row:nth-child(even) { padding-left: 12px; border-left: 0.5px solid #141416; }
+.cs-sk { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .1em; color: #444; text-transform: uppercase; }
+.cs-sv { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ghost); }
+.cs-sv.c { color: var(--cyan); } .cs-sv.g { color: #C4A84F; } .cs-sv.o { color: var(--orange); }
+
+/* ownership chain */
+.ownership-chain { display: flex; flex-direction: column; gap: 0; }
+.oc-node { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; position: relative; }
+.oc-node:not(:last-child)::after {
+  content: ''; position: absolute; left: 6px; top: 24px; bottom: 0;
+  width: 1px; background: var(--b2);
+}
+.oc-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+.oc-dot.current { background: #C4A84F; box-shadow: 0 0 8px rgba(196,168,79,.4); }
+.oc-dot.prev    { background: var(--b2); border: 1px solid #333; }
+.oc-dot svg { width: 7px; height: 7px; }
+.oc-text {}
+.oc-owner { font-family: 'Chakra Petch', monospace; font-size: 11px; color: var(--ghost); }
+.oc-detail { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #555; margin-top: 1px; }
+
+/* authenticity breakdown */
+.auth-score {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.auth-big { font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 700; color: #C4A84F; font-variant-numeric: tabular-nums; }
+.auth-big span { font-size: 16px; }
+.auth-desc { font-size: 11px; color: #555; line-height: 1.5; }
+.auth-parts { display: flex; flex-direction: column; gap: 5px; }
+.auth-part { display: flex; align-items: center; gap: 8px; }
+.auth-part-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.auth-part-dot.original { background: #C4A84F; }
+.auth-part-dot.replaced { background: var(--orange); }
+.auth-part-dot.unknown  { background: #333; }
+.auth-part-name { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ghost); flex: 1; }
+.auth-part-status { font-family: 'JetBrains Mono', monospace; font-size: 9px; }
+.auth-part-status.original { color: #C4A84F; }
+.auth-part-status.replaced { color: var(--orange); }
+.auth-part-status.unknown  { color: #555; }
+
+/* build stages (project) */
+.build-stage { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 0.5px solid #141416; }
+.bs-icon { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.bs-icon.done    { background: var(--cyan); }
+.bs-icon.current { background: var(--orange); animation: blink 1.5s infinite; }
+.bs-icon.pending { background: #333; }
+.bs-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; flex: 1; }
+.bs-text.done    { color: var(--ghost); }
+.bs-text.current { color: var(--orange); }
+.bs-text.pending { color: #333; }
+.bs-label { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+.bs-label.done    { color: var(--cyan); }
+.bs-label.current { color: var(--orange); }
+.bs-label.pending { color: #2a2a32; }
+
+/* cs action row */
+.cs-actions { display: flex; gap: 7px; margin-top: 14px; }
+.cs-act-primary {
+  flex: 1; font-family: 'Chakra Petch', monospace; font-size: 11px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: #08080A;
+  background: var(--cyan); border: none; padding: 13px 16px; cursor: pointer;
+  clip-path: polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+}
+.cs-act-secondary {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--dim); background: transparent;
+  border: 0.5px solid var(--b2); padding: 13px 14px; cursor: pointer;
+  clip-path: polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);
+}
+
+/* legacy single car card (kept for compat) */
+.car-card { background: var(--bg2); border: 0.5px solid #1e1e22; padding: 12px; margin-bottom: 8px; }
+.cc-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 0.5px solid var(--b1); }
+.cc-ico { width: 32px; height: 32px; background: var(--bg3); border: 0.5px solid var(--b2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cc-name { font-family: 'Chakra Petch', monospace; font-size: 13px; font-weight: 700; color: var(--ghost); }
+.cc-sub { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #555; margin-top: 1px; }
+.spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.spec-row { display: flex; flex-direction: column; padding: 7px 0; border-bottom: 0.5px solid #141416; }
+.spec-row:nth-child(odd)  { padding-right: 10px; }
+.spec-row:nth-child(even) { padding-left: 10px; border-left: 0.5px solid #141416; }
+.sk { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #444; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; }
+.sv { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ghost); }
+.sv.c { color: var(--cyan); }
+
+/* leaderboard */
+.lb-box { background: var(--bg2); border: 0.5px solid #1e1e22; margin-bottom: 8px; }
+.lb-box-hd {
+  display: flex; justify-content: space-between; padding: 8px 10px;
+  border-bottom: 0.5px solid var(--b1);
+  font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .12em; color: #333; text-transform: uppercase;
+}
+.lb-row-d {
+  display: grid; grid-template-columns: 26px 1fr auto;
+  gap: 7px; align-items: center;
+  padding: 10px 10px; border-bottom: 0.5px solid #0f0f11;
+  cursor: pointer; transition: background .15s;
+}
+.lb-row-d:last-child { border-bottom: none; }
+.lb-row-d:active { background: #0f0f11; }
+.lb-row-d.me { background: rgba(0,212,232,.04); border-left: 1.5px solid var(--cyan); }
+.lbd-pos { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); text-align: center; font-variant-numeric: tabular-nums; }
+.lb-row-d.me .lbd-pos { color: var(--cyan); }
+.lbd-car { font-family: 'Chakra Petch', monospace; font-size: 12px; font-weight: 600; color: var(--ghost); }
+.lb-row-d.me .lbd-car { color: var(--cyan); }
+.lbd-spec { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #2a2a32; }
+.lbd-time { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--ghost); font-variant-numeric: tabular-nums; text-align: right; }
+.lb-row-d.me .lbd-time { color: var(--cyan); }
+.lbd-delta { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #333; text-align: right; }
+
+/* otto panel in dash */
+.otto-panel {
+  background: var(--bg2); border: 0.5px solid #1e1e22;
+  border-top: 1.5px solid var(--orange); padding: 12px; margin-bottom: 10px;
+}
+.op-hd { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; }
+.op-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); animation: blink 2s infinite; }
+.op-name { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .16em; color: var(--orange); text-transform: uppercase; }
+.op-msg {
+  background: var(--bg3); border: 0.5px solid #1e1e22;
+  border-left: 2px solid var(--orange); padding: 10px;
+  font-size: 13px; color: #999; line-height: 1.65;
+}
+.op-msg strong { color: var(--ghost); }
+.op-actions { display: flex; gap: 5px; margin-top: 9px; flex-wrap: wrap; }
+.op-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .05em;
+  padding: 7px 11px; border: 0.5px solid #2a2a30; color: #555;
+  cursor: pointer; text-transform: uppercase; background: transparent;
+  transition: all .15s; clip-path: polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%);
+}
+.op-btn:active { border-color: rgba(255,87,51,.3); color: var(--orange); background: rgba(255,87,51,.05); }
+
+/* upload */
+.upload-zone {
+  background: var(--bg2); border: 1px dashed var(--b2);
+  padding: 32px 16px; text-align: center; cursor: pointer;
+  transition: all .2s; margin-bottom: 10px;
+}
+.upload-zone:active { border-color: rgba(0,212,232,.4); background: rgba(0,212,232,.02); }
+.uz-title { font-size: 12px; color: #666; margin-bottom: 4px; }
+.uz-sub { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #333; letter-spacing: .05em; }
+.fmt-row { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+.fmt {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .08em;
+  padding: 3px 8px; border: 0.5px solid #2a2a30; color: #555; text-transform: uppercase;
+}
+.fmt.on { border-color: rgba(0,212,232,.3); color: var(--cyan); }
+
+/* verified flash */
+.verified-flash {
+  position: fixed; inset: 0; background: rgba(0,212,232,.08);
+  z-index: 500; pointer-events: none; opacity: 0; transition: opacity .4s;
+}
+.verified-flash.show { opacity: 1; }
+
+/* ═══════════════════════════════════
+   SHARE CARD MODAL
+═══════════════════════════════════ */
+.share-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.88);
+  z-index: 600;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  padding: 0;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s ease;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.share-overlay.open { opacity: 1; pointer-events: all; }
+
+.share-modal {
+  width: 100%; max-width: 420px;
+  display: flex; flex-direction: column;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  gap: 12px;
+  transform: translateY(20px);
+  transition: transform .35s ease;
+}
+.share-overlay.open .share-modal { transform: translateY(0); }
+
+.share-modal-hd {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.share-modal-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .2em; color: var(--dim); text-transform: uppercase;
+}
+.share-close {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: #444; cursor: pointer; padding: 4px 8px;
+  border: 0.5px solid var(--b2); transition: color .2s;
+  background: transparent;
+}
+.share-close:hover { color: var(--ghost); }
+
+/* canvas preview wrapper */
+.share-canvas-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9/16;
+  background: var(--bg);
+  border: 0.5px solid var(--b2);
+  overflow: hidden;
+}
+.share-canvas-wrap canvas {
+  width: 100%; height: 100%;
+  display: block;
+}
+
+/* format toggle */
+.format-row {
+  display: flex; gap: 6px;
+}
+.fmt-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 6px 14px; border: 0.5px solid var(--b2); color: var(--dim);
+  background: transparent; cursor: pointer;
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  transition: all .15s;
+}
+.fmt-btn.active {
+  border-color: rgba(0,212,232,.4); color: var(--cyan);
+  background: rgba(0,212,232,.06);
+}
+
+/* action buttons */
+.share-actions {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.share-dl-btn {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 12px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: #08080A;
+  background: var(--cyan); border: none;
+  padding: 16px 24px; cursor: pointer;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  width: 100%; transition: box-shadow .2s;
+}
+.share-dl-btn:active { box-shadow: 0 0 24px rgba(0,212,232,.4); }
+.share-native-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--dim); background: transparent;
+  border: 0.5px solid var(--b2);
+  padding: 14px 20px; cursor: pointer;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  width: 100%; transition: all .2s;
+}
+.share-native-btn:active { color: var(--ghost); border-color: #555; }
+.share-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .08em; color: #2a2a32;
+  text-align: center; text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════
+   DESKTOP ENHANCEMENT
+   768px+ gets sidebar layout back
+═══════════════════════════════════ */
+@media (min-width: 768px) {
+
+  /* ── NAV ── */
+  .nav { padding: 12px 24px; }
+  .nav-logo { font-size: 13px; }
+  .nav-center {
+    display: block !important;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: .14em; color: var(--dim); text-transform: uppercase;
+  }
+
+  /* ── LANDING — two-column ── */
+  #screen-landing { overflow: hidden; }
+  .land-scroll { overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+  .land-grid { position: fixed; }
+  .land-glow { width: 600px; height: 600px; }
+
+  .land-body-dt {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .land-hero {
+    padding: 48px 40px 32px;
+    display: flex; flex-direction: column; justify-content: center;
+    overflow-y: auto; border-right: 0.5px solid var(--b1);
+  }
+  .land-h1 { font-size: clamp(52px, 5.5vw, 76px); }
+  .land-sub { font-size: 14px; max-width: 420px; }
+  .land-cta-col { flex-direction: row; gap: 10px; }
+  .btn-primary { width: auto; }
+  .btn-ghost   { width: auto; }
+  .land-stats  { margin: 32px 0 0; background: none; gap: 0; }
+  .ls-block    { background: transparent; padding: 14px 20px 14px 0; text-align: left; }
+  .ls-num      { font-size: 24px; }
+
+  /* right column: leaderboard */
+  .land-right-dt {
+    display: flex !important;
+    flex-direction: column;
+    padding: 48px 40px 32px;
+    overflow-y: auto;
+    background: var(--bg2);
+  }
+  .land-right-lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; letter-spacing: .2em; color: var(--dim);
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .lb-preview { margin: 0; border-top-width: 3px; flex: 1; }
+  .telem-strip { display: none; }
+
+  /* ── ONBOARDING: restore sidebars ── */
+  .onboard-shell {
+    display: grid !important;
+    grid-template-columns: 200px 1fr 200px !important;
+    flex: 1 !important; overflow: hidden !important;
+  }
+  .progress-strip { display: none !important; }
+  .twin-pill { display: none !important; }
+  .onboard-mobile-wrap { display: contents !important; }
+  .prog-sidebar {
+    display: flex !important; flex-direction: column;
+    border-right: 0.5px solid var(--b1); padding: 16px 0;
+    background: var(--bg); overflow-y: auto;
+  }
+  .twin-sidebar-dt {
+    display: flex !important; flex-direction: column;
+    border-left: 0.5px solid var(--b1); padding: 12px;
+    background: var(--bg); overflow-y: auto;
+  }
+
+  /* ── DASHBOARD ── */
+  .dash-hero { padding: 20px 24px 0; }
+  .dh-avatar { width: 64px; height: 64px; font-size: 20px; }
+  .dh-handle { font-size: 22px; }
+  .dash-bottom-nav { display: none !important; }
+  .dash-shell {
+    display: grid !important;
+    grid-template-columns: 200px 1fr !important;
+    flex: 1 !important; overflow: hidden !important;
+  }
+  .dash-sidebar-dt {
+    display: flex !important; flex-direction: column;
+    border-right: 0.5px solid var(--b1); padding: 12px 0;
+    overflow-y: auto;
+  }
+  #dash-content-mob {
+    overflow-y: auto; padding: 20px 24px;
+  }
+
+  /* ── GARAGE on desktop: 2×grid instead of carousel ── */
+  .garage-carousel { display: none !important; }
+  .gc-dots         { display: none !important; }
+  .garage-grid-dt  { display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ── SHARE MODAL centered ── */
+  .share-overlay { align-items: center; justify-content: center; padding: 24px; }
+  .share-modal { max-width: 480px; border: 0.5px solid var(--b2); background: var(--bg); }
+
+  /* ── CAR SHEET centered on desktop ── */
+  .car-sheet {
+    max-width: 520px; left: 50%; right: auto;
+    transform: translateX(-50%) translateY(100%);
+    border-radius: 0; border-left: 0.5px solid var(--b2); border-right: 0.5px solid var(--b2);
+  }
+  .car-sheet.open { transform: translateX(-50%) translateY(0); }
+
+  /* chat input font — no iOS zoom needed on desktop */
+  .chat-input { font-size: 13px !important; }
+}
+
+/* desktop sidebar shared styles (shown only ≥768px) */
+.prog-sidebar, .twin-sidebar-dt, .dash-sidebar-dt { display: none; }
+
+.prog-step {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 10px 14px; border-left: 2px solid transparent;
+  transition: all .2s;
+}
+.prog-step.done   { border-left-color: #2a2a32; }
+.prog-step.active { border-left-color: var(--orange); background: rgba(255,87,51,.04); }
+.prog-step.locked { opacity: .3; }
+.ps-num { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--dim); width: 16px; flex-shrink: 0; margin-top: 1px; }
+.prog-step.done .ps-num   { color: #2a2a32; }
+.prog-step.active .ps-num { color: var(--orange); }
+.ps-title { font-family: 'Chakra Petch', monospace; font-size: 11px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: .04em; }
+.prog-step.active .ps-title { color: var(--ghost); }
+.prog-step.done .ps-title  { color: #333; }
+.ps-sub { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #2a2a32; margin-top: 2px; }
+.prog-step.active .ps-sub { color: #444; }
+.prog-lbl { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .2em; color: #2a2a32; text-transform: uppercase; padding: 0 14px 8px; }
+
+.twin-lbl { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .2em; color: var(--dim); text-transform: uppercase; margin-bottom: 10px; }
+.twin-card { background: var(--bg2); border: 0.5px solid var(--b2); border-top: 1.5px solid transparent; padding: 10px; transition: border-color .4s; }
+.twin-card.has-data { border-top-color: var(--cyan); }
+.twin-empty { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #2a2a32; letter-spacing: .06em; line-height: 1.7; }
+.twin-field { margin-bottom: 7px; padding-bottom: 7px; border-bottom: 0.5px solid var(--b1); }
+.twin-field:last-child { border-bottom: none; margin-bottom: 0; }
+.tf-key { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .1em; color: var(--dim); text-transform: uppercase; margin-bottom: 2px; }
+.tf-val { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ghost); }
+.tf-val.c { color: var(--cyan); }
+
+.dsb-lbl { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .18em; color: #333; text-transform: uppercase; padding: 0 12px 6px; }
+.dsb-item { display: flex; align-items: center; gap: 7px; padding: 8px 12px; cursor: pointer; transition: background .15s; border-left: 2px solid transparent; }
+.dsb-item:hover { background: #0f0f11; }
+.dsb-item.active { background: #0f0f11; border-left-color: var(--cyan); }
+.dsb-icon { width: 13px; height: 13px; color: #444; flex-shrink: 0; }
+.dsb-item.active .dsb-icon { color: var(--cyan); }
+.dsb-text { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #555; letter-spacing: .04em; }
+.dsb-item.active .dsb-text { color: var(--ghost); }
+.dsb-badge { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 8px; padding: 1px 5px; background: rgba(0,212,232,.1); color: var(--cyan); border-radius: 2px; }
+.dsb-badge.o { background: rgba(255,87,51,.1); color: var(--orange); }
+
+/* Mobile onboard wrapper */
+.onboard-mobile-wrap { display: flex; flex-direction: column; flex: 1; overflow: hidden; min-height: 0; }
+</style>
+</head>
+<body>
+
+<div class="verified-flash" id="verifiedFlash"></div>
+
+<!-- CAR DETAIL BOTTOM SHEET -->
+<div class="car-sheet-backdrop" id="carSheetBackdrop" onclick="closeCarSheet()"></div>
+<div class="car-sheet" id="carSheet">
+  <div class="cs-handle"><div class="cs-handle-bar"></div></div>
+  <div class="cs-accent-line" id="cs-accent"></div>
+  <div class="cs-body" id="cs-body"><!-- rendered by JS --></div>
+</div>
+<div class="share-overlay" id="shareOverlay">
+  <div class="share-modal">
+    <div class="share-modal-hd">
+      <span class="share-modal-title">// Share Card · Export</span>
+      <button class="share-close" onclick="closeShareModal()">✕ CLOSE</button>
+    </div>
+    <div class="format-row">
+      <button class="fmt-btn active" id="fmt-story"  onclick="setFormat('story',this)">Story 9:16</button>
+      <button class="fmt-btn"        id="fmt-square" onclick="setFormat('square',this)">Square 1:1</button>
+      <button class="fmt-btn"        id="fmt-wide"   onclick="setFormat('wide',this)">Card 4:5</button>
+    </div>
+    <div class="share-canvas-wrap" id="shareCanvasWrap">
+      <canvas id="shareCanvas"></canvas>
+    </div>
+    <div class="share-actions">
+      <button class="share-dl-btn" onclick="downloadCard()">↓ SAVE IMAGE</button>
+      <button class="share-native-btn" onclick="nativeShare()">⇧ SHARE TO…</button>
+    </div>
+    <div class="share-hint">Save image → paste into Stories / Telegram / WhatsApp</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 1: LANDING
+════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="nav">
+    <div class="nav-logo">AUTO<em>GRAMM</em></div>
+    <div class="nav-center" style="display:none">// Performance Data Infrastructure · Moscow Raceway</div>
+    <div class="nav-right"><div class="live-dot"></div> LIVE</div>
+  </div>
+
+  <div class="land-scroll">
+    <!-- desktop: two-column wrapper -->
+    <div class="land-body-dt" style="display:contents">
+    <div style="display:contents" id="land-left-col">
+    <div class="land-grid"></div>
+    <div style="position:relative;overflow:hidden">
+      <div class="land-glow"></div>
+
+      <div class="land-hero">
+        <div class="land-tag">// The machine runs the leaderboard</div>
+        <h1 class="land-h1">Your car<br>earns its<br><span>rank.</span></h1>
+        <p class="land-sub">
+          Hardware linked to track time. Every lap <strong>verified by AI</strong>, every build public.
+          If it's not logged — it didn't happen.
+        </p>
+        <div class="land-cta-col">
+          <button class="btn-primary" onclick="goToOnboard()">CLAIM YOUR HANDLE →</button>
+          <button class="btn-ghost" onclick="goToOnboard()">How it works</button>
+        </div>
+      </div>
+
+      <div class="land-stats">
+        <div class="ls-block"><div class="ls-num c">2,847</div><div class="ls-lbl">Verified Laps</div></div>
+        <div class="ls-block"><div class="ls-num">38</div><div class="ls-lbl">Machines</div></div>
+        <div class="ls-block"><div class="ls-num">100</div><div class="ls-lbl">Badges</div></div>
+      </div>
+
+      <div class="lb-preview">
+        <div class="lbp-hd">
+          <span class="lbp-title">// Moscow Raceway · GT</span>
+          <span class="lbp-live">Live · 38</span>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">01</span>
+          <div><div class="lb-car">GT-R R35</div><div class="lb-spec">Haltech Elite 2500 · HKS GT800</div></div>
+          <div class="lb-time-col"><div class="lb-time">1:42.381</div><div class="lb-delta">—</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">02</span>
+          <div><div class="lb-car">BMW M3 E92</div><div class="lb-spec">KW V3 · MHD Stage 2</div></div>
+          <div class="lb-time-col"><div class="lb-time">1:43.014</div><div class="lb-delta">+0.633</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">03</span>
+          <div><div class="lb-car">GR86</div><div class="lb-spec">BC Racing · R888R</div></div>
+          <div class="lb-time-col"><div class="lb-time">1:43.777</div><div class="lb-delta">+1.396</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">04</span>
+          <div><div class="lb-car">Civic Type R FK8</div><div class="lb-spec">Mugen Aero</div></div>
+          <div class="lb-time-col"><div class="lb-time" style="color:var(--dim)">1:44.220</div><div class="lb-delta">+1.839</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()" style="border-bottom:none">
+          <span class="lb-pos">05</span>
+          <div><div class="lb-car">BMW M4 G82</div><div class="lb-spec">CSL Parts · Cup 2</div></div>
+          <div class="lb-time-col"><div class="lb-time">1:44.811</div><div class="lb-delta">+2.430</div></div>
+        </div>
+        <div class="lbp-foot" onclick="goToOnboard()">
+          <span class="lbp-foot-t">+ 2,842 more machines → claim your spot</span>
+        </div>
+      </div>
+
+      <div class="telem-strip">
+        <svg viewBox="0 0 375 24" preserveAspectRatio="none">
+          <polyline points="0,18 24,18 36,6 52,5 64,19 82,21 94,10 108,7 122,18 136,20 148,4 168,1 180,14 196,16 208,6 224,5 236,13 252,18 264,8 278,5 292,12 308,14 320,3 340,0 352,9 366,16 375,12" fill="none" stroke="#00D4E8" stroke-width="1" opacity=".28"/>
+        </svg>
+      </div>
+    </div><!-- /land-left-col inner -->
+    </div><!-- /land-left-col -->
+
+    <!-- desktop right column: full leaderboard -->
+    <div class="land-right-dt" style="display:none">
+      <div class="land-right-lbl">// Moscow Raceway · GT Class · Live</div>
+      <div class="lb-preview" style="margin:0;flex:1">
+        <div class="lbp-hd">
+          <span class="lbp-title">38 machines verified</span>
+          <span class="lbp-live">Live · Updating</span>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">01</span>
+          <div><div class="lb-car">GT-R R35</div><div class="lb-spec">Haltech Elite 2500 · HKS GT800 · Rays TE37</div></div>
+          <div class="lb-time-col"><div class="lb-time">1:42.381</div><div class="lb-delta">—</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">02</span>
+          <div><div class="lb-car">BMW M3 E92</div><div class="lb-spec">KW V3 · MHD Stage 2 · Stoptech ST-60</div></div>
+          <div class="lb-time-col"><div class="lb-time">1:43.014</div><div class="lb-delta">+0.633</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">03</span>
+          <div><div class="lb-car">GR86</div><div class="lb-spec">BC Racing BR · Radium FPR · R888R</div></div>
+          <div class="lb-time-col"><div class="lb-time">1:43.777</div><div class="lb-delta">+1.396</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">04</span>
+          <div><div class="lb-car">Civic Type R FK8</div><div class="lb-spec">Mugen Aero · Endless Brakes</div></div>
+          <div class="lb-time-col"><div class="lb-time" style="color:var(--dim)">1:44.220</div><div class="lb-delta">+1.839</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">05</span>
+          <div><div class="lb-car">BMW M4 G82</div><div class="lb-spec">CSL Parts · Michelin Cup 2</div></div>
+          <div class="lb-time-col"><div class="lb-time">1:44.811</div><div class="lb-delta">+2.430</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()">
+          <span class="lb-pos">06</span>
+          <div><div class="lb-car">Porsche 911 GT3</div><div class="lb-spec">PDK · Michelin Cup 2R</div></div>
+          <div class="lb-time-col"><div class="lb-time">1:45.102</div><div class="lb-delta">+2.721</div></div>
+        </div>
+        <div class="lb-row" onclick="goToOnboard()" style="border-bottom:none">
+          <span class="lb-pos">07</span>
+          <div><div class="lb-car">Subaru WRX STI</div><div class="lb-spec">Cobb Stage 3 · Enkei · AD08R</div></div>
+          <div class="lb-time-col"><div class="lb-time">1:45.884</div><div class="lb-delta">+3.503</div></div>
+        </div>
+        <div class="lbp-foot" onclick="goToOnboard()">
+          <span class="lbp-foot-t">+ 2,835 more machines → claim your spot</span>
+        </div>
+      </div>
+    </div><!-- /land-right-dt -->
+    </div><!-- /land-body-dt -->
+  </div><!-- /land-scroll -->
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 2: OTTO ONBOARDING
+════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-onboard">
+  <div class="nav">
+    <div class="nav-logo">AUTO<em>GRAMM</em></div>
+    <div class="nav-right" style="cursor:pointer" onclick="goToLanding()">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="10 3 5 8 10 13"/></svg>
+      Back
+    </div>
+  </div>
+
+  <!-- MOBILE: progress strip -->
+  <div class="progress-strip">
+    <div class="ps-inner">
+      <div class="ps-step active" id="mob-ps-1">
+        <div class="ps-step-num">01</div>
+        <div class="ps-step-label">Identity</div>
+      </div>
+      <div class="ps-step locked" id="mob-ps-2">
+        <div class="ps-step-num">02</div>
+        <div class="ps-step-label">Twin</div>
+      </div>
+      <div class="ps-step locked" id="mob-ps-3">
+        <div class="ps-step-num">03</div>
+        <div class="ps-step-label">Telemetry</div>
+      </div>
+      <div class="ps-step locked" id="mob-ps-4">
+        <div class="ps-step-num">04</div>
+        <div class="ps-step-label">Verified</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESKTOP: sidebar + twin -->
+  <div style="display:none" class="onboard-shell" id="onboard-shell-desktop">
+    <!-- progress sidebar -->
+    <div class="prog-sidebar" id="prog-sidebar-dt">
+      <div class="prog-lbl">// Digital Audit</div>
+      <div class="prog-step active" id="ps-1">
+        <span class="ps-num">01</span>
+        <div><div class="ps-title">Identity</div><div class="ps-sub">Claim handle</div></div>
+      </div>
+      <div class="prog-step locked" id="ps-2">
+        <span class="ps-num">02</span>
+        <div><div class="ps-title">Digital Twin</div><div class="ps-sub">Machine DNA</div></div>
+      </div>
+      <div class="prog-step locked" id="ps-3">
+        <span class="ps-num">03</span>
+        <div><div class="ps-title">Telemetry</div><div class="ps-sub">Upload log</div></div>
+      </div>
+      <div class="prog-step locked" id="ps-4">
+        <span class="ps-num">04</span>
+        <div><div class="ps-title">Verified</div><div class="ps-sub">Get ranked</div></div>
+      </div>
+    </div>
+
+    <!-- chat (desktop) -->
+    <div class="otto-chat" id="otto-chat-desktop"><!-- cloned by JS --></div>
+
+    <!-- twin sidebar (desktop) -->
+    <div class="twin-sidebar-dt" id="twin-sidebar-dt">
+      <div class="twin-lbl">// Digital Twin</div>
+      <div class="twin-card" id="twinCard-dt">
+        <div class="twin-empty" id="twinEmpty-dt">Waiting for<br>machine data...</div>
+        <div id="twinFields-dt" style="display:none">
+          <div class="twin-field"><div class="tf-key">Handle</div><div class="tf-val c" id="tf-handle-dt">—</div></div>
+          <div class="twin-field"><div class="tf-key">Machine</div><div class="tf-val" id="tf-machine-dt">—</div></div>
+          <div class="twin-field"><div class="tf-key">Year</div><div class="tf-val" id="tf-year-dt">—</div></div>
+          <div class="twin-field"><div class="tf-key">Engine</div><div class="tf-val" id="tf-engine-dt">—</div></div>
+          <div class="twin-field"><div class="tf-key">ECU</div><div class="tf-val c" id="tf-ecu-dt">—</div></div>
+          <div class="twin-field"><div class="tf-key">Suspension</div><div class="tf-val" id="tf-susp-dt">—</div></div>
+          <div class="twin-field"><div class="tf-key">Tires</div><div class="tf-val" id="tf-tires-dt">—</div></div>
+          <div class="twin-field"><div class="tf-key">Class</div><div class="tf-val c" id="tf-class-dt">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE: chat + twin pill -->
+  <div class="onboard-mobile-wrap" id="onboard-mobile-wrap">
+    <div class="otto-chat" id="otto-chat-mobile">
+      <div class="otto-header">
+        <div class="otto-dot"></div>
+        <span class="otto-name">Otto — Online</span>
+        <span class="otto-kb">UNOST'83 KB</span>
+      </div>
+      <div class="chat-feed" id="onboardFeed"></div>
+      <div class="typing-wrap" id="onboardTyping">
+        <div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#444;margin-left:5px;letter-spacing:.08em">OTTO</span>
+      </div>
+      <div class="input-area">
+        <input type="text" class="chat-input" id="onboardInput" placeholder="Type your answer..." autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="send-btn" id="onboardSendBtn" onclick="onboardSend()">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#08080A" stroke-width="2"><line x1="2" y1="8" x2="14" y2="8"/><polyline points="9 3 14 8 9 13"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- twin pill (scrollable chips) -->
+    <div class="twin-pill" id="twinPill">
+      <span class="twin-pill-empty" id="twinPillEmpty">// Digital Twin building...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 3: DASHBOARD
+════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-dash">
+  <div class="nav">
+    <div class="nav-logo">AUTO<em>GRAMM</em></div>
+    <div class="nav-right"><div class="live-dot"></div> LIVE</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="dash-hero">
+    <div class="dh-row1">
+      <div class="dh-avatar" id="dash-avatar">?</div>
+      <div class="dh-info">
+        <div class="dh-handle" id="dash-handle">@HANDLE</div>
+        <div class="dh-sub">// VERIFIED AUTOGRAMM™</div>
+        <div class="dh-bio" id="dash-bio">Machine · Moscow Raceway</div>
+        <div class="dh-tags">
+          <span class="dh-tag c" id="dash-class-tag">GT Class</span>
+          <span class="dh-tag o">Verified Origin</span>
+        </div>
+      </div>
+    </div>
+    <div class="dh-stats">
+      <div class="dh-st"><div class="dh-st-num c" id="dash-bestlap">—</div><div class="dh-st-lbl">Best Lap</div></div>
+      <div class="dh-st"><div class="dh-st-num">1</div><div class="dh-st-lbl">Sessions</div></div>
+      <div class="dh-st"><div class="dh-st-num" id="dash-rank">—</div><div class="dh-st-lbl">GT Rank</div></div>
+    </div>
+    <div class="tstrip">
+      <svg viewBox="0 0 375 24" preserveAspectRatio="none">
+        <polyline points="0,18 30,18 45,5 70,5 85,20 115,20 130,10 160,10 175,18 205,18 220,6 255,6 270,18 305,18 320,4 355,4 370,18 375,18" fill="none" stroke="#00D4E8" stroke-width="1" opacity=".35"/>
+      </svg>
+    </div>
+    <!-- Car selector chips — swipe to switch active car -->
+    <div class="dh-car-select" id="dhCarSelect" style="padding:0 16px 10px;margin-top:6px">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- Desktop sidebar layout -->
+  <div class="dash-shell" id="dash-shell-dt" style="display:none">
+    <div class="dash-sidebar-dt">
+      <div class="dsb-lbl">// Session</div>
+      <div class="dsb-item active" onclick="showPanel('lap',this)">
+        <svg class="dsb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2 10 6 6 9 9 14 4"/></svg>
+        <span class="dsb-text">Lap Data</span>
+        <span class="dsb-badge">NEW</span>
+      </div>
+      <div class="dsb-item" onclick="showPanel('upload',this)">
+        <svg class="dsb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 11V5M5 7l3-3 3 3"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg>
+        <span class="dsb-text">Upload Log</span>
+      </div>
+      <div class="dsb-lbl" style="margin-top:8px">// Machine</div>
+      <div class="dsb-item" onclick="showPanel('garage',this)">
+        <svg class="dsb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="7" width="14" height="7" rx="1"/><path d="M3 7V5a5 5 0 0 1 10 0v2"/><circle cx="5" cy="11" r="1"/><circle cx="11" cy="11" r="1"/></svg>
+        <span class="dsb-text">Garage</span>
+      </div>
+      <div class="dsb-item" onclick="showPanel('lb',this)">
+        <svg class="dsb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="2" x2="8" y2="14"/><line x1="4" y1="6" x2="4" y2="14"/><line x1="12" y1="4" x2="12" y2="14"/></svg>
+        <span class="dsb-text">Leaderboard</span>
+      </div>
+      <div class="dsb-lbl" style="margin-top:8px">// AI</div>
+      <div class="dsb-item" onclick="showPanel('otto',this)">
+        <svg class="dsb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5 8h6M8 5v6"/></svg>
+        <span class="dsb-text">Otto Agent</span>
+        <span class="dsb-badge o">AI</span>
+      </div>
+    </div>
+    <div class="dash-content" id="dash-content-dt"><!-- panels cloned by JS --></div>
+  </div>
+
+  <!-- Mobile: content + bottom nav -->
+  <div class="dash-content" id="dash-content-mob" style="flex:1">
+    <!-- LAP -->
+    <div class="panel active" id="panel-lap">
+      <div class="sec-hd">
+        <span class="sec-title">// Lap Analysis · GT</span>
+        <button class="act-btn">Share Card</button>
+      </div>
+      <div class="best-lap">
+        <div class="bl-num" id="panel-bestlap-time">—</div>
+        <div class="bl-track">Moscow Raceway · Full Layout · 2025-03-18</div>
+        <div class="bl-meta">
+          <div class="bl-item"><span class="bl-val">238 km/h</span><span class="bl-key">Top Speed</span></div>
+          <div class="bl-item"><span class="bl-val">1.87g</span><span class="bl-key">Peak G</span></div>
+          <div class="bl-item"><span class="bl-val">Lap 7</span><span class="bl-key">Session</span></div>
+          <div class="bl-item"><span class="bl-val" style="color:var(--cyan)">92%</span><span class="bl-key">Consistency</span></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="stat-card">
+          <div class="sc-val c">+0.633s</div>
+          <div class="sc-lbl">Gap to P1</div>
+          <div class="sc-sub">vs @UNOST83_LEAD</div>
+          <div class="cbar"><div class="cbar-fill" style="width:63%"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-val" id="panel-rank-card">—</div>
+          <div class="sc-lbl">Global Rank · GT</div>
+          <div class="sc-sub">Moscow Raceway</div>
+          <div class="cbar"><div class="cbar-fill" style="width:96%;background:var(--orange)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="panel" id="panel-upload">
+      <div class="sec-hd"><span class="sec-title">// Upload Log File</span></div>
+      <div class="upload-zone">
+        <div class="uz-title">Drop telemetry file here</div>
+        <div class="uz-sub">RaceChrono .CSV · VBOX .VBO</div>
+        <div class="fmt-row">
+          <span class="fmt on">.CSV</span>
+          <span class="fmt on">.VBO</span>
+          <span class="fmt">.MoTeC soon</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GARAGE -->
+    <div class="panel" id="panel-garage" style="display:flex;flex-direction:column;height:100%;padding:0">
+      <!-- filter tabs -->
+      <div style="padding:10px 14px 0;flex-shrink:0">
+        <div class="fleet-bar" style="margin-bottom:10px">
+          <div class="fb-block"><div class="fb-num track">4</div><div class="fb-lbl">Track</div></div>
+          <div class="fb-block"><div class="fb-num street">3</div><div class="fb-lbl">Street</div></div>
+          <div class="fb-block"><div class="fb-num heritage">5</div><div class="fb-lbl">Heritage</div></div>
+          <div class="fb-block"><div class="fb-num project">3</div><div class="fb-lbl">Project</div></div>
+        </div>
+        <div class="garage-filters">
+          <button class="gf-tab all active" onclick="filterGarage('all',this)">All · 15</button>
+          <button class="gf-tab track"      onclick="filterGarage('track',this)">Track · 4</button>
+          <button class="gf-tab street"     onclick="filterGarage('street',this)">Street · 3</button>
+          <button class="gf-tab heritage"   onclick="filterGarage('heritage',this)">Heritage · 5</button>
+          <button class="gf-tab project"    onclick="filterGarage('project',this)">Project · 3</button>
+        </div>
+      </div>
+
+      <!-- swipe carousel (mobile) -->
+      <div class="garage-carousel">
+        <div class="gc-track" id="gcTrack"></div>
+      </div>
+
+      <!-- 2×grid (desktop) -->
+      <div class="garage-grid-dt" id="garageGridDt" style="display:none;padding:14px"></div>
+
+      <!-- pagination dots (mobile only) -->
+      <div class="gc-dots" id="gcDots"></div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div class="panel" id="panel-lb">
+      <div class="sec-hd">
+        <span class="sec-title">// Moscow Raceway · GT Class</span>
+        <button class="act-btn">Share</button>
+      </div>
+      <div class="lb-box">
+        <div class="lb-box-hd"><span>Rank · Machine</span><span>Verified Time</span></div>
+        <div class="lb-row-d">
+          <span class="lbd-pos">01</span>
+          <div class="lbd-machine"><div class="lbd-car">GT-R R35</div><div class="lbd-spec">Haltech Elite 2500</div></div>
+          <div><div class="lbd-time">1:42.381</div><div class="lbd-delta">—</div></div>
+        </div>
+        <div class="lb-row-d me">
+          <span class="lbd-pos" id="lb-my-pos">02</span>
+          <div class="lbd-machine"><div class="lbd-car" id="lb-my-car">BMW M3 E92</div><div class="lbd-spec" id="lb-my-spec">KW V3 · MHD S2</div></div>
+          <div><div class="lbd-time" id="lb-my-time">1:43.014</div><div class="lbd-delta">+0.633</div></div>
+        </div>
+        <div class="lb-row-d">
+          <span class="lbd-pos">03</span>
+          <div class="lbd-machine"><div class="lbd-car">GR86</div><div class="lbd-spec">BC Racing · R888R</div></div>
+          <div><div class="lbd-time">1:43.777</div><div class="lbd-delta">+1.396</div></div>
+        </div>
+        <div class="lb-row-d" style="border-bottom:none">
+          <span class="lbd-pos">04</span>
+          <div class="lbd-machine"><div class="lbd-car">Civic Type R FK8</div><div class="lbd-spec">Mugen Aero</div></div>
+          <div><div class="lbd-time" style="color:var(--dim)">1:44.220</div><div class="lbd-delta">+1.839</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OTTO DASH -->
+    <div class="panel" id="panel-otto">
+      <div class="sec-hd"><span class="sec-title">// Otto · Your Engineer</span></div>
+      <div class="otto-panel">
+        <div class="op-hd">
+          <div class="op-dot"></div>
+          <span class="op-name">Otto — Online</span>
+        </div>
+        <div class="op-msg" id="dash-otto-msg">
+          📊 <strong>Analysis ready.</strong> Digital Twin loaded. Ask me anything about setup, tire strategy, or where you're giving time away on Moscow Raceway.
+        </div>
+        <div class="op-actions">
+          <button class="op-btn">Tire pressure +25°C?</button>
+          <button class="op-btn">Compare vs class leader</button>
+          <button class="op-btn">Sector 2 losses?</button>
+          <button class="op-btn">KW V3 setup?</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom nav (mobile) -->
+  <div class="dash-bottom-nav">
+    <div class="bn-item active" onclick="showPanel('lap',this)" data-panel="lap">
+      <svg class="bn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2 10 6 6 9 9 14 4"/></svg>
+      <span class="bn-label">Lap</span>
+      <span class="bn-badge">NEW</span>
+    </div>
+    <div class="bn-item" onclick="showPanel('upload',this)" data-panel="upload">
+      <svg class="bn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 11V5M5 7l3-3 3 3"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg>
+      <span class="bn-label">Upload</span>
+    </div>
+    <div class="bn-item" onclick="showPanel('garage',this)" data-panel="garage">
+      <svg class="bn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="7" width="14" height="7" rx="1"/><path d="M3 7V5a5 5 0 0 1 10 0v2"/><circle cx="5" cy="11" r="1"/><circle cx="11" cy="11" r="1"/></svg>
+      <span class="bn-label">Garage</span>
+    </div>
+    <div class="bn-item" onclick="showPanel('lb',this)" data-panel="lb">
+      <svg class="bn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="2" x2="8" y2="14"/><line x1="4" y1="6" x2="4" y2="14"/><line x1="12" y1="4" x2="12" y2="14"/></svg>
+      <span class="bn-label">Ranks</span>
+    </div>
+    <div class="bn-item otto-nav" onclick="showPanel('otto',this)" data-panel="otto">
+      <svg class="bn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5 8h6M8 5v6"/></svg>
+      <span class="bn-label">Otto</span>
+      <span class="bn-badge o">AI</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════
+   RESPONSIVE LAYOUT INIT
+════════════════════════════════════ */
+function isDesktop() { return window.innerWidth >= 768; }
+
+/* ════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.classList.add('hidden');
+  });
+  const sc = document.getElementById('screen-' + id);
+  sc.classList.remove('hidden');
+  setTimeout(() => sc.classList.add('active'), 10);
+}
+
+function goToLanding()  { showScreen('landing'); }
+
+function goToOnboard() {
+  showScreen('onboard');
+  if (!onboardStarted) startOnboard();
+}
+
+function goToDashboard(twin) {
+  populateDashboard(twin);
+  showScreen('dash');
+  flashVerified();
+}
+
+function flashVerified() {
+  const el = document.getElementById('verifiedFlash');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 700);
+}
+
+/* ════════════════════════════════════
+   DASHBOARD PANELS
+════════════════════════════════════ */
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+
+  // mobile bottom nav
+  document.querySelectorAll('.bn-item').forEach(i => i.classList.remove('active'));
+  // desktop sidebar
+  document.querySelectorAll('.dsb-item').forEach(i => i.classList.remove('active'));
+
+  if (el) el.classList.add('active');
+
+  // scroll to top
+  const content = document.getElementById('dash-content-mob');
+  if (content) content.scrollTop = 0;
+}
+
+function populateDashboard(twin) {
+  const handle  = twin.handle    || '@PILOT';
+  const initials = handle.replace('@','').slice(0,2).toUpperCase();
+  const car      = twin.car      || 'Unknown Machine';
+  const rank     = twin.rank     || '#?';
+  const lap      = twin.lap      || '—';
+  const cls      = twin.carClass || 'GT Class';
+  const ecu      = twin.ecu      || '—';
+  const susp     = twin.suspension || '—';
+  const tires    = twin.tires    || '—';
+  const engine   = twin.engine   || '—';
+
+  document.getElementById('dash-avatar').textContent = initials;
+  document.getElementById('dash-handle').textContent = handle;
+  document.getElementById('dash-bio').textContent = `${car} · Moscow Raceway`;
+  document.getElementById('dash-class-tag').textContent = cls;
+  document.getElementById('dash-bestlap').textContent = lap;
+  document.getElementById('dash-rank').textContent = rank;
+  document.getElementById('panel-bestlap-time').textContent = lap;
+  document.getElementById('panel-rank-card').textContent = rank;
+  document.getElementById('garage-car-name').textContent = car;
+  document.getElementById('gs-engine').textContent = engine;
+  document.getElementById('gs-ecu').textContent = ecu;
+  document.getElementById('gs-susp').textContent = susp;
+  document.getElementById('gs-tires').textContent = tires;
+  document.getElementById('gs-class').textContent = cls;
+  document.getElementById('lb-my-car').textContent = car;
+  document.getElementById('lb-my-spec').textContent = `${susp} · ${ecu}`;
+  document.getElementById('lb-my-time').textContent = lap;
+}
+
+/* ════════════════════════════════════
+   OTTO ONBOARDING ENGINE
+════════════════════════════════════ */
+let onboardStarted = false;
+let onboardLoading = false;
+const onboardHistory = [];
+const digitalTwin = {};
+
+const ONBOARD_SYSTEM = `You are Otto, the AI concierge and crew chief for Autogramm — a motorsport verification platform. You are conducting a "Digital Audit" to onboard a new pilot and build their Digital Twin.
+
+YOUR ROLE: Guide the pilot through 4 acts of onboarding via natural conversation. Be direct, technical, and cool — like a proper race engineer, not a customer service bot. No fluff.
+
+THE 4 ACTS:
+ACT 1 — IDENTITY: Ask for their handle (unique username, like @driver_name). Confirm it.
+ACT 2 — DIGITAL TWIN: Collect car info. Ask ONE question at a time:
+  - Make and model (e.g. BMW M3, GT-R R35, GR86)
+  - Year
+  - Engine/power setup
+  - Key mods: ECU tune, suspension, brakes, tires
+  After collecting mods, ASSIGN a class: Stock / Club-Sport / GT / Pro based on modification level.
+ACT 3 — TELEMETRY: Ask if they have a telemetry file ready (.CSV from RaceChrono or .VBO from VBOX). If yes, say great, they can upload it in the dashboard. If no, tell them their machine will be listed as "Unverified" until they do. That is fine.
+ACT 4 — VERIFIED: Summarize the Digital Twin (handle, car, class). Tell them their machine is being placed in the leaderboard. End with the exact phrase: "DIGITAL TWIN COMPLETE. Launching your dashboard."
+
+CRITICAL INSTRUCTIONS:
+- Ask ONE thing at a time. Never dump multiple questions.
+- Confirm what you heard before asking the next thing.
+- When you detect the pilot has answered the final question in ACT 4, END your message with: ##LAUNCH_DASHBOARD##
+- Also output JSON updates when confirming each piece of data. Format: ##TWIN_UPDATE## {"field":"value"} ##END_UPDATE##
+  Fields to update: handle, car, year, engine, ecu, suspension, tires, carClass
+  For demo also set: lap to "1:43.014" and rank to "#02"
+
+LANGUAGE: Respond in the same language the pilot writes in. Russian → Russian. English → English. Technical terms stay in original form (KW V3, MHD Stage 2, etc.)`;
+
+async function callOttoOnboard(userMsg) {
+  onboardHistory.push({ role: 'user', content: userMsg });
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: ONBOARD_SYSTEM,
+      messages: onboardHistory
+    })
+  });
+  if (!resp.ok) throw new Error('API ' + resp.status);
+  const data = await resp.json();
+  const text = data.content.find(b => b.type === 'text')?.text || '';
+  onboardHistory.push({ role: 'assistant', content: text });
+  return text;
+}
+
+function parseAndUpdateTwin(text) {
+  const matches = [...text.matchAll(/##TWIN_UPDATE##\s*(\{[^}]+\})\s*##END_UPDATE##/g)];
+  for (const m of matches) {
+    try {
+      const update = JSON.parse(m[1]);
+      Object.assign(digitalTwin, update);
+      applyTwinUpdate(update);
+    } catch(e) {}
+  }
+}
+
+function applyTwinUpdate(update) {
+  // mobile pill
+  const pill = document.getElementById('twinPill');
+  const empty = document.getElementById('twinPillEmpty');
+  if (empty && Object.keys(digitalTwin).length > 0) empty.style.display = 'none';
+
+  const labelMap = {
+    handle: 'Handle', car: 'Machine', year: 'Year',
+    engine: 'Engine', ecu: 'ECU', suspension: 'Susp',
+    tires: 'Tires', carClass: 'Class'
+  };
+
+  for (const [key, val] of Object.entries(update)) {
+    if (!labelMap[key]) continue;
+    // update or create chip
+    let chip = document.getElementById('chip-' + key);
+    if (!chip) {
+      chip = document.createElement('div');
+      chip.className = 'twin-chip';
+      chip.id = 'chip-' + key;
+      chip.innerHTML = `<div class="twin-chip-key">${labelMap[key]}</div><div class="twin-chip-val${key==='handle'||key==='ecu'||key==='carClass' ? ' c' : ''}" id="chipval-${key}">—</div>`;
+      pill.appendChild(chip);
+    }
+    const vEl = document.getElementById('chipval-' + key);
+    if (vEl) vEl.textContent = val;
+  }
+
+  // scroll pill to end
+  if (pill) setTimeout(() => { pill.scrollLeft = pill.scrollWidth; }, 100);
+}
+
+function updateProgress(step) {
+  // mobile strips
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('mob-ps-' + i);
+    if (!el) continue;
+    el.classList.remove('active','done','locked');
+    if (i < step)       el.classList.add('done');
+    else if (i === step) el.classList.add('active');
+    else                 el.classList.add('locked');
+  }
+  // desktop sidebar
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('ps-' + i);
+    if (!el) continue;
+    el.classList.remove('active','done','locked');
+    if (i < step)       el.classList.add('done');
+    else if (i === step) el.classList.add('active');
+    else                 el.classList.add('locked');
+  }
+}
+
+function detectStep(text) {
+  const t = text.toLowerCase();
+  if (t.includes('handle') || t.includes('никнейм') || t.includes('позывной')) return 1;
+  if (/make|model|марка|модель|car|machine|машин|ecu|suspension|подвеск|tires|шин|engine|двигател|class|класс/.test(t)) return 2;
+  if (/telemetry|телеметр|\.csv|\.vbo|log|лог/.test(t)) return 3;
+  if (/dashboard|launch|дашборд|verified|верифицир|complete/.test(t)) return 4;
+  return null;
+}
+
+function stripDirectives(text) {
+  return text
+    .replace(/##TWIN_UPDATE##[\s\S]*?##END_UPDATE##/g, '')
+    .replace(/##LAUNCH_DASHBOARD##/g, '')
+    .trim();
+}
+
+function addOnboardMsg(role, rawText) {
+  const feed = document.getElementById('onboardFeed');
+  const clean = stripDirectives(rawText);
+  if (!clean) return;
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.style.opacity = '0';
+
+  const meta = role === 'user' ? 'YOU' : 'OTTO';
+  div.innerHTML = `<div class="msg-meta">${meta}</div><div class="msg-bubble">${clean.replace(/\n/g,'<br>')}</div>`;
+
+  feed.appendChild(div);
+  requestAnimationFrame(() => {
+    div.style.transition = 'opacity .3s ease, transform .3s ease';
+    div.style.transform = role === 'user' ? 'translateX(8px)' : 'translateX(-8px)';
+    requestAnimationFrame(() => { div.style.opacity='1'; div.style.transform='translateX(0)'; });
+  });
+  setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 50);
+}
+
+function setLoading(v) {
+  onboardLoading = v;
+  const btn = document.getElementById('onboardSendBtn');
+  if (btn) btn.disabled = v;
+  const t = document.getElementById('onboardTyping');
+  if (t) {
+    t.classList.toggle('active', v);
+    if (v) document.getElementById('onboardFeed').scrollTop = 9999;
+  }
+}
+
+async function startOnboard() {
+  onboardStarted = true;
+  setLoading(true);
+  try {
+    const reply = await callOttoOnboard('START_ONBOARDING');
+    setLoading(false);
+    addOnboardMsg('otto', reply);
+    const step = detectStep(reply);
+    if (step) updateProgress(step);
+  } catch(e) {
+    setLoading(false);
+    addOnboardMsg('otto', 'Connection error. Check network and reload.');
+  }
+}
+
+async function processReply(userText) {
+  if (onboardLoading || !userText.trim()) return;
+  addOnboardMsg('user', userText);
+  setLoading(true);
+  try {
+    const reply = await callOttoOnboard(userText);
+    parseAndUpdateTwin(reply);
+    setLoading(false);
+
+    if (reply.includes('##LAUNCH_DASHBOARD##')) {
+      addOnboardMsg('otto', reply);
+      setTimeout(() => goToDashboard(digitalTwin), 1800);
+      return;
+    }
+
+    addOnboardMsg('otto', reply);
+    const step = detectStep(reply);
+    if (step) updateProgress(step);
+  } catch(e) {
+    setLoading(false);
+    addOnboardMsg('otto', 'Error: ' + e.message);
+  }
+}
+
+function onboardSend() {
+  const inp = document.getElementById('onboardInput');
+  const text = inp.value.trim();
+  if (!text || onboardLoading) return;
+  inp.value = '';
+  processReply(text);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('onboardInput');
+  if (inp) {
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); onboardSend(); }
+    });
+  }
+  // hide native share button if API not available
+  if (!navigator.share) {
+    const nb = document.querySelector('.share-native-btn');
+    if (nb) nb.style.display = 'none';
+  }
+});
+
+/* ════════════════════════════════════
+   FLEET DATA
+════════════════════════════════════ */
+const FLEET = [
+  /* ── TRACK ── */
+  { id:'bmw-m3-e92', type:'track', name:'BMW M3 E92', year:'2009', status:'verified', activeCar:true,
+    statVal:'1:43.014', statKey:'Best Lap', class:'GT Class', trackHrs:'38h',
+    specs:[{k:'Engine',v:'S65B40 · 420hp'},{k:'ECU',v:'MHD Stage 2',c:true},{k:'Suspension',v:'KW V3 Coilovers',c:true},{k:'Brakes',v:'StopTech 355mm'},{k:'Tires',v:'Michelin PS4S'},{k:'Exhaust',v:'Akrapovič Slip-On'}] },
+  { id:'gtr-r35', type:'track', name:'Nissan GT-R R35', year:'2015', status:'verified',
+    statVal:'1:42.381', statKey:'Best Lap', class:'GT Pro', trackHrs:'54h',
+    specs:[{k:'Engine',v:'VR38DETT · 800hp'},{k:'ECU',v:'Haltech Elite 2500',c:true},{k:'Suspension',v:'Öhlins TTX'},{k:'Brakes',v:'Brembo GT-R 380mm'},{k:'Tires',v:'Yokohama ADVAN A052'},{k:'Turbo',v:'HKS GT800 Kit',c:true}] },
+  { id:'gr86', type:'track', name:'Toyota GR86', year:'2022', status:'verified',
+    statVal:'1:47.220', statKey:'Best Lap', class:'Club-Sport', trackHrs:'12h',
+    specs:[{k:'Engine',v:'FA24 · 228hp'},{k:'ECU',v:'Ecutek Stage 1',c:true},{k:'Suspension',v:'BC Racing BR'},{k:'Brakes',v:'OEM upgraded'},{k:'Tires',v:'Bridgestone R888R'},{k:'Aero',v:'Voltex Front Lip'}] },
+  { id:'fk8', type:'track', name:'Civic Type R FK8', year:'2020', status:'pending',
+    statVal:'Pending', statKey:'No log yet', class:'Club-Sport', trackHrs:'4h',
+    specs:[{k:'Engine',v:'K20C1 · 320hp'},{k:'ECU',v:'Hondata FlashPro',c:true},{k:'Suspension',v:'Mugen Springs'},{k:'Brakes',v:'Brembo OEM'},{k:'Tires',v:'Michelin PS4'},{k:'Aero',v:'Mugen Full Kit'}] },
+  /* ── STREET ── */
+  { id:'bmw-m4-g82', type:'street', name:'BMW M4 G82', year:'2023', status:'none',
+    statVal:'~1:46', statKey:'Est. Lap', class:'GT Class', trackHrs:'0h',
+    specs:[{k:'Engine',v:'S58B30 · 530hp'},{k:'Gearbox',v:'8-speed DCT'},{k:'Suspension',v:'M Adaptive'},{k:'Brakes',v:'M Carbon Ceramic'},{k:'Tires',v:'Michelin PS4S'},{k:'Package',v:'Competition xDrive'}] },
+  { id:'911-992', type:'street', name:'Porsche 911 992', year:'2022', status:'none',
+    statVal:'Stock', statKey:'No mods', class:'GT Class', trackHrs:'2h',
+    specs:[{k:'Engine',v:'3.0 TT Flat-6 · 385hp'},{k:'Gearbox',v:'8-speed PDK'},{k:'Suspension',v:'PASM Sport'},{k:'Brakes',v:'PCCB Ceramic'},{k:'Tires',v:'Pirelli P Zero'},{k:'Mode',v:'Sport Chrono Pkg'}] },
+  { id:'gt500', type:'street', name:'Shelby GT500', year:'2021', status:'none',
+    statVal:'Street', statKey:'Not logged', class:'GT Pro', trackHrs:'0h',
+    specs:[{k:'Engine',v:'5.2 Predator V8 SC · 760hp'},{k:'Gearbox',v:'7-speed DCT'},{k:'Suspension',v:'MagneRide 4.0'},{k:'Brakes',v:'Brembo 6-piston'},{k:'Tires',v:'Michelin PS4S'},{k:'Package',v:'Track Package'}] },
+  /* ── HERITAGE ── */
+  { id:'ferrari-308', type:'heritage', name:'Ferrari 308 GTB', year:'1978', status:'verified',
+    statVal:'92%', statKey:'Authenticity', authenticity:92, class:'Italian GT · Cavallino Class', collectionValue:'€ 110,000–135,000',
+    specs:[{k:'Engine',v:'3.0L V8 Carb · 255hp'},{k:'Gearbox',v:'5-speed Manual'},{k:'Body',v:'Vetroresina (GRP)',c:true},{k:'Color',v:'Rosso Corsa #322 — Original',c:true},{k:'VIN',v:'F106A000 28893'},{k:'Odometer',v:'67,440 km'}],
+    ownership:[{owner:'Scuderia Filipinetti',year:'1978–81',detail:'First owner · Geneva delivery'},{owner:'Private · Milano',year:'1981–94',detail:'Long-term single keeper'},{owner:'Meccanica Classica',year:'1994–2007',detail:'Restoration · original parts'},{owner:'Current Owner',year:'2007–Now',detail:'Certificate of Authenticity',current:true}],
+    parts:[{name:'Engine Block',status:'original'},{name:'Gearbox',status:'original'},{name:'Body Panels',status:'original'},{name:'Interior',status:'original'},{name:'Carburettors',status:'replaced',detail:'Weber 40DCNF — period correct'},{name:'Wiring Harness',status:'replaced'},{name:'Exhaust',status:'original'},{name:'Dashboard',status:'unknown'}] },
+  { id:'rs27', type:'heritage', name:'Porsche 911 Carrera RS', year:'1973', status:'verified',
+    statVal:'97%', statKey:'Authenticity', authenticity:97, class:'Homologation Special · GT5', collectionValue:'€ 1,200,000–1,600,000',
+    specs:[{k:'Engine',v:'2.7L Flat-6 MFI · 210hp'},{k:'Gearbox',v:'5-speed 915'},{k:'Body',v:'Ducktail Spoiler — Original',c:true},{k:'Color',v:'Gulf Orange · Matching #',c:true},{k:'Chassis',v:'#911 360 0xxx'},{k:'Produced',v:'1,580 units worldwide'}],
+    ownership:[{owner:'Dr. H. Müller · Stuttgart',year:'1973–89',detail:'Original keeper · no track use'},{owner:'Canepa Motorsport',year:'1989–98',detail:'Concours restoration'},{owner:'Private · Monaco',year:'1998–2019',detail:'Zero mods · stored'},{owner:'Current Owner',year:'2019–Now',detail:'FIVA certified · Porsche CoA',current:true}],
+    parts:[{name:'Engine',status:'original'},{name:'Gearbox',status:'original'},{name:'Lightweight Body',status:'original'},{name:'Ducktail',status:'original'},{name:'Interior RS spec',status:'original'},{name:'Fuel Injection',status:'original'},{name:'Fuchs Wheels',status:'original'},{name:'Windscreen',status:'replaced'}] },
+  { id:'delta-hf', type:'heritage', name:'Lancia Delta HF Integrale', year:'1990', status:'verified',
+    statVal:'88%', statKey:'Authenticity', authenticity:88, class:'Rally Legend · WRC Homologation', collectionValue:'€ 65,000–85,000',
+    specs:[{k:'Engine',v:'2.0 8V Turbo · 215hp'},{k:'Drivetrain',v:'4WD · Viscous LSD',c:true},{k:'Rally Evo',v:'Evoluzione spec',c:true},{k:'Color',v:'Bianco Perla — Original'},{k:'Chassis',v:'Integrale 16v Evo I'},{k:'Odometer',v:'94,220 km'}],
+    ownership:[{owner:'Martini Racing Team',year:'1990–92',detail:'Works car · WRC'},{owner:'Private · Turin',year:'1992–2008',detail:'Restored post-rally'},{owner:'Current Owner',year:'2008–Now',detail:'FIA historic homologation',current:true}],
+    parts:[{name:'Engine Block',status:'original'},{name:'Turbocharger',status:'replaced',detail:'Garrett T3 — period'},{name:'4WD System',status:'original'},{name:'Bodywork',status:'original'},{name:'Roll Cage',status:'original'},{name:'Interior',status:'replaced'},{name:'Suspension',status:'replaced',detail:'Period Bilstein'},{name:'Seats',status:'unknown'}] },
+  { id:'supra-mk3', type:'heritage', name:'Toyota Supra MK3', year:'1988', status:'none',
+    statVal:'78%', statKey:'Authenticity', authenticity:78, class:'JDM Legend · A70 Turbo', collectionValue:'€ 38,000–55,000',
+    specs:[{k:'Engine',v:'7M-GTE · 235hp'},{k:'Gearbox',v:'W58 5-speed Manual'},{k:'Color',v:'Super White — Original'},{k:'Trim',v:'3.0 Turbo A Spec'},{k:'Market',v:'JDM — Japan Import'},{k:'Odometer',v:'112,400 km'}],
+    ownership:[{owner:'Toyota Dealer · Osaka',year:'1988–95',detail:'First owner · JDM spec'},{owner:'Export · Russia',year:'2004',detail:'Grey import'},{owner:'Previous Owner',year:'2004–18',detail:'Minor engine work'},{owner:'Current Owner',year:'2018–Now',detail:'Authenticity restoration',current:true}],
+    parts:[{name:'Engine 7M-GTE',status:'original'},{name:'Gearbox W58',status:'original'},{name:'Bodywork',status:'original'},{name:'Head Gasket',status:'replaced'},{name:'Interior',status:'replaced'},{name:'Turbo CT26',status:'replaced',detail:'Stock spec'},{name:'Suspension',status:'replaced'},{name:'Exhaust',status:'unknown'}] },
+  { id:'rx7-fc', type:'heritage', name:'Mazda RX-7 FC3S', year:'1989', status:'none',
+    statVal:'85%', statKey:'Authenticity', authenticity:85, class:'Rotary Heritage · FC Turbo II', collectionValue:'€ 22,000–34,000',
+    specs:[{k:'Engine',v:'13B-T Rotary · 185hp'},{k:'Gearbox',v:'5-speed Manual'},{k:'Color',v:'Brilliant Black — Original',c:true},{k:'Turbo',v:'IHI RHB52 — Original'},{k:'Market',v:'JDM Turbo II',c:true},{k:'Odometer',v:'88,600 km'}],
+    ownership:[{owner:'Mazda Autozam · Hiroshima',year:'1989–97',detail:'Original keeper'},{owner:'Private · Tokyo',year:'1997–2011',detail:'Engine rebuild at 80k km'},{owner:'Current Owner',year:'2011–Now',detail:'Rotary specialist maintained',current:true}],
+    parts:[{name:'13B Rotary',status:'original'},{name:'IHI Turbo',status:'original'},{name:'Body Panels',status:'original'},{name:'Apex Seals',status:'replaced'},{name:'Cooling System',status:'replaced'},{name:'Interior',status:'original'},{name:'Exhaust Manifold',status:'original'},{name:'ECU',status:'unknown'}] },
+  /* ── PROJECT ── */
+  { id:'e30-build', type:'project', name:'BMW E30 · GT Build', year:'1988', status:'building',
+    statVal:'65%', statKey:'Build Complete', buildPct:65, targetClass:'GT Class',
+    specs:[{k:'Donor',v:'E30 325i · 1988'},{k:'Engine',v:'S54B32 swap · planned',c:true},{k:'Cage',v:'FIA 8855-1999',c:true},{k:'Susp',v:'KW Competition installed'},{k:'Brakes',v:'E46 M3 swap — done'},{k:'Target',v:'GT Class · Moscow R.'}],
+    stages:[{label:'Strip & cage',status:'done'},{label:'Suspension & brakes',status:'done'},{label:'S54 engine swap',status:'current'},{label:'Wiring & ECU',status:'pending'},{label:'Aero & body',status:'pending'},{label:'Shakedown',status:'pending'}] },
+  { id:'datsun-240z', type:'project', name:'Datsun 240Z · Restomod', year:'1972', status:'building',
+    statVal:'40%', statKey:'Build Complete', buildPct:40, targetClass:'Heritage',
+    specs:[{k:'Donor',v:'240Z · 1972 · L24'},{k:'Engine',v:'RB26 swap · planned',c:true},{k:'Body',v:'Full bare-metal resto'},{k:'Target',v:'Heritage · Restomod'},{k:'Status',v:'Bodywork stage'},{k:'ETA',v:'Q4 2025'}],
+    stages:[{label:'Disassembly & blast',status:'done'},{label:'Rust repair & metal work',status:'current'},{label:'Body & paint',status:'pending'},{label:'RB26 engine prep',status:'pending'},{label:'Interior & trim',status:'pending'},{label:'Shakedown',status:'pending'}] },
+  { id:'vaz-sleeper', type:'project', name:'VAZ 2107 · Sleeper', year:'1993', status:'building',
+    statVal:'80%', statKey:'Build Complete', buildPct:80, targetClass:'Club-Sport',
+    specs:[{k:'Donor',v:'VAZ 2107 · 1993'},{k:'Engine',v:'2JZ-GTE swap · DONE',c:true},{k:'Gearbox',v:'R154 + custom tunnel'},{k:'Susp',v:'Koni + custom fab'},{k:'Status',v:'Brakes + wiring left'},{k:'ETA',v:'Q1 2025 shakedown'}],
+    stages:[{label:'2JZ-GTE + R154 swap',status:'done'},{label:'Custom engine mounts',status:'done'},{label:'Suspension overhaul',status:'done'},{label:'Brake system upgrade',status:'current'},{label:'Final wiring & ECU tune',status:'pending'},{label:'First start + shakedown',status:'pending'}] },
+];
+
+/* ════════════════════════════════════
+   GARAGE CAROUSEL
+════════════════════════════════════ */
+let currentFilter = 'all';
+let activeTileId  = 'bmw-m3-e92';
+let filteredFleet = [];
+let _scrollTimeout = null;
+
+function getFilteredFleet() {
+  return currentFilter === 'all' ? FLEET : FLEET.filter(c => c.type === currentFilter);
+}
+
+function renderGarage() {
+  filteredFleet = getFilteredFleet();
+  const track = document.getElementById('gcTrack');
+  const dots  = document.getElementById('gcDots');
+  if (!track || !dots) return;
+
+  track.innerHTML = '';
+  dots.innerHTML  = '';
+
+  filteredFleet.forEach((car, i) => {
+    const isActive = car.id === activeTileId;
+
+    /* ── SLIDE ── */
+    const slide = document.createElement('div');
+    slide.className = 'gc-slide';
+    slide.dataset.idx = i;
+
+    const card = document.createElement('div');
+    card.className = `gc-card ${car.type}${isActive ? ' active-car' : ''}`;
+    card.onclick = () => openCarSheet(car.id);
+
+    const dotCls = { verified:'verified', pending:'pending', building:'building', none:'none' }[car.status] || 'none';
+
+    /* status + active tag */
+    const activeTag = isActive ? `<span class="gc-active-tag">ACTIVE</span>` : '';
+
+    /* main stat */
+    let statVal = car.statVal;
+    let statKey = car.statKey;
+
+    /* specs peek — first 4 specs */
+    const peekSpecs = (car.specs || []).slice(0, 4);
+    const specsHtml = peekSpecs.map(s =>
+      `<div class="gsp-item"><span class="gsp-k">${s.k}</span><span class="gsp-v${s.c?' c':''}">${s.v}</span></div>`
+    ).join('');
+
+    /* type-specific bottom elements */
+    let extraHtml = '';
+    if (car.type === 'track') {
+      extraHtml = `
+        <div class="gc-spark">
+          <svg viewBox="0 0 340 28" preserveAspectRatio="none">
+            <polyline points="0,22 20,22 30,7 45,6 58,23 80,25 92,12 110,9 124,22 140,24 152,5 172,1 184,17 200,19 212,8 230,7 244,16 262,22 274,10 292,6 306,15 322,17 334,4 340,4"
+              fill="none" stroke="var(--cyan)" stroke-width="1.2" stroke-linejoin="round" opacity=".5"/>
+          </svg>
+        </div>`;
+    } else if (car.type === 'heritage') {
+      extraHtml = `
+        <div class="gc-auth">
+          <div class="gc-auth-bar"><div class="gc-auth-fill" style="width:${car.authenticity}%"></div></div>
+        </div>`;
+    } else if (car.type === 'project') {
+      extraHtml = `
+        <div class="gc-build">
+          <div class="gc-build-bar"><div class="gc-build-fill" style="width:${car.buildPct}%"></div></div>
+          <div class="gc-build-label"><span>Build progress</span><span>${car.buildPct}%</span></div>
+        </div>`;
+    }
+
+    const subDetail = car.type === 'track' ? car.trackHrs + ' on track'
+      : car.type === 'heritage' ? car.authenticity + '% authentic'
+      : car.type === 'project'  ? 'Target: ' + car.targetClass
+      : 'No telemetry yet';
+
+    card.innerHTML = `
+      <div class="gc-stripe"></div>
+      <div class="gc-inner">
+        <div class="gc-top">
+          <div class="gc-type-lbl"><div class="gc-sdot ${dotCls}"></div>${car.type.toUpperCase()}</div>
+          ${activeTag}
+        </div>
+        <div class="gc-name">${car.name}</div>
+        <div class="gc-year">${car.year}</div>
+        <div class="gc-stat">
+          <div class="gc-stat-val">${statVal}</div>
+          <div class="gc-stat-key">${statKey}</div>
+        </div>
+        ${extraHtml}
+        <div class="gc-sub-row">
+          <span class="gc-class">${car.class}</span>
+          <span class="gc-detail">${subDetail}</span>
+        </div>
+        <div class="gc-specs-peek">${specsHtml}</div>
+      </div>
+      <div class="gc-tap-hint">tap for details ↑</div>`;
+
+    slide.appendChild(card);
+    track.appendChild(slide);
+
+    /* ── DOT ── */
+    const dot = document.createElement('div');
+    dot.className = `gc-dot ${car.type}${i === 0 ? ' active' : ''}`;
+    dot.dataset.idx = i;
+    dot.onclick = () => scrollToSlide(i);
+    dots.appendChild(dot);
+  });
+
+  /* scroll listener for dot sync */
+  track.removeEventListener('scroll', _onCarouselScroll);
+  track.addEventListener('scroll', _onCarouselScroll, { passive: true });
+}
+
+function _onCarouselScroll() {
+  clearTimeout(_scrollTimeout);
+  _scrollTimeout = setTimeout(() => syncDots(), 80);
+}
+
+function syncDots() {
+  const track = document.getElementById('gcTrack');
+  if (!track) return;
+  const slides = track.querySelectorAll('.gc-slide');
+  const trackCenter = track.scrollLeft + track.clientWidth / 2;
+  let closest = 0, minDist = Infinity;
+  slides.forEach((s, i) => {
+    const dist = Math.abs(s.offsetLeft + s.offsetWidth / 2 - trackCenter);
+    if (dist < minDist) { minDist = dist; closest = i; }
+  });
+  document.querySelectorAll('.gc-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === closest);
+  });
+}
+
+function scrollToSlide(idx) {
+  const track  = document.getElementById('gcTrack');
+  const slides = track?.querySelectorAll('.gc-slide');
+  if (!slides || !slides[idx]) return;
+  slides[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function filterGarage(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.gf-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGarage();
+  // scroll to active car if visible in new filter
+  const newFleet = getFilteredFleet();
+  const idx = newFleet.findIndex(c => c.id === activeTileId);
+  if (idx >= 0) setTimeout(() => scrollToSlide(idx), 80);
+}
+
+/* ════════════════════════════════════
+   CAR DETAIL BOTTOM SHEET
+════════════════════════════════════ */
+function openCarSheet(id) {
+  const car = FLEET.find(c => c.id === id);
+  if (!car) return;
+  buildSheetContent(car);
+  document.getElementById('cs-accent').className = `cs-accent-line ${car.type}`;
+  document.getElementById('carSheetBackdrop').classList.add('open');
+  setTimeout(() => document.getElementById('carSheet').classList.add('open'), 10);
+}
+
+function closeCarSheet() {
+  document.getElementById('carSheet').classList.remove('open');
+  document.getElementById('carSheetBackdrop').classList.remove('open');
+}
+
+function buildSheetContent(car) {
+  const body = document.getElementById('cs-body');
+  const badgeLabel = car.type === 'track' ? `Track · ${car.status === 'verified' ? '✓ Verified' : 'Pending'}` : car.type === 'street' ? 'Street' : car.type === 'heritage' ? '◆ Heritage' : '⚙ Project';
+  const statusSub  = car.type === 'track' ? `${car.class} · ${car.trackHrs} track` : car.type === 'heritage' ? car.class : car.type === 'project' ? `Target: ${car.targetClass}` : car.class;
+
+  let html = `<div class="cs-hd"><div><div class="cs-name">${car.name}</div><div class="cs-meta">${car.year} · ${statusSub}</div></div><div class="cs-badge ${car.type}">${badgeLabel}</div></div>`;
+
+  html += `<div class="cs-section-lbl">// Specifications</div><div class="cs-spec-grid">`;
+  car.specs.forEach(s => { html += `<div class="cs-spec-row"><span class="cs-sk">${s.k}</span><span class="cs-sv${s.c?' c':''}">${s.v}</span></div>`; });
+  html += `</div>`;
+
+  if (car.type === 'heritage') {
+    const orig = car.parts.filter(p => p.status === 'original').length;
+    const repl = car.parts.filter(p => p.status === 'replaced').length;
+    const unk  = car.parts.filter(p => p.status === 'unknown').length;
+    const total = car.parts.length;
+    html += `
+      <div class="cs-section-lbl">// Authenticity Passport</div>
+      <div style="background:var(--bg2);border:0.5px solid #1e1e22;border-top:2px solid #C4A84F;padding:14px;margin-bottom:12px">
+        <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:10px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:700;color:#C4A84F;font-variant-numeric:tabular-nums;line-height:1">${car.authenticity}<span style="font-size:18px">%</span></div>
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555;letter-spacing:.1em;text-transform:uppercase">${orig} of ${total} parts original</div>
+            <div style="display:flex;gap:10px;margin-top:6px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#C4A84F">●&nbsp;${orig} original</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--orange)">●&nbsp;${repl} replaced</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#444">●&nbsp;${unk} unknown</span>
+            </div>
+          </div>
+        </div>
+        <div style="height:3px;background:var(--b1);border-radius:2px;overflow:hidden">
+          <div style="height:100%;width:${car.authenticity}%;background:linear-gradient(90deg,#C4A84F,#F0D080);border-radius:2px"></div>
+        </div>
+      </div>
+      <div class="auth-parts">`;
+    car.parts.forEach(p => {
+      const detail = p.detail ? `<span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#333"> · ${p.detail}</span>` : '';
+      html += `<div class="auth-part">
+        <div class="auth-part-dot ${p.status}"></div>
+        <span class="auth-part-name">${p.name}</span>
+        ${detail}
+        <span class="auth-part-status ${p.status}">${p.status.toUpperCase()}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  } else if (car.type === 'project') {
+    html += `<div class="cs-section-lbl">// Build Progress · ${car.buildPct}%</div><div class="build-stages">`;
+    car.stages.forEach(s => {
+      html += `<div class="build-stage"><div class="bs-icon ${s.status}"></div><span class="bs-text ${s.status}">${s.label}</span><span class="bs-label ${s.status}">${s.status==='done'?'DONE':s.status==='current'?'NOW':'—'}</span></div>`;
+    });
+    html += `</div>`;
+  } else if (car.type === 'track') {
+    html += `<div class="cs-section-lbl">// Performance</div>
+      <div style="background:var(--bg2);border:0.5px solid #1e1e22;border-top:1.5px solid var(--cyan);padding:12px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--cyan);font-variant-numeric:tabular-nums">${car.statVal}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#555;margin-top:2px;letter-spacing:.1em;text-transform:uppercase">Best Lap · ${car.class}</div>
+        <div style="display:flex;gap:14px;margin-top:10px">
+          <div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--ghost)">${car.trackHrs}</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#444;text-transform:uppercase">Track Time</div></div>
+          <div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${car.status==='verified'?'var(--cyan)':'var(--orange)'}">${car.status==='verified'?'✓ Verified':'Pending'}</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#444;text-transform:uppercase">Status</div></div>
+        </div>
+      </div>`;
+  }
+
+  html += `<div class="cs-actions">`;
+  if (car.type === 'track') {
+    html += `<button class="cs-act-primary" onclick="setActiveCar('${car.id}')">Set Active Car</button><button class="cs-act-secondary" onclick="closeCarSheet();openShareModal()">Share Card</button>`;
+  } else if (car.type === 'heritage') {
+    html += `<button class="cs-act-primary" style="background:#C4A84F" onclick="closeCarSheet()">View Certificate</button><button class="cs-act-secondary" onclick="closeCarSheet()">Share</button>`;
+  } else if (car.type === 'project') {
+    html += `<button class="cs-act-primary" style="background:var(--orange)" onclick="closeCarSheet()">Add Build Log</button><button class="cs-act-secondary" onclick="closeCarSheet()">Edit</button>`;
+  } else {
+    html += `<button class="cs-act-primary" onclick="closeCarSheet()">Upload Telemetry</button><button class="cs-act-secondary" onclick="closeCarSheet()">Edit</button>`;
+  }
+  html += `</div>`;
+  body.innerHTML = html;
+}
+
+function setActiveCar(id) {
+  activeTileId = id;
+  const car = FLEET.find(c => c.id === id);
+  if (!car) return;
+  document.querySelectorAll('.dh-cs-chip').forEach(ch => ch.classList.toggle('active', ch.dataset.id === id));
+  renderGarage();
+  closeCarSheet();
+}
+
+function renderCarSelectorChips() {
+  const container = document.getElementById('dhCarSelect');
+  if (!container) return;
+  container.innerHTML = '';
+  FLEET.filter(c => c.type === 'track' || c.type === 'street').forEach(car => {
+    const chip = document.createElement('button');
+    chip.className = `dh-cs-chip${car.id === activeTileId ? ' active' : ''}`;
+    chip.dataset.id = car.id;
+    chip.textContent = car.name.split(' ').slice(-2).join(' ');
+    chip.onclick = () => setActiveCar(car.id);
+    container.appendChild(chip);
+  });
+}
+
+/* wrap showPanel to init garage */
+const _origShowPanel = showPanel;
+function showPanel(id, el) {
+  _origShowPanel(id, el);
+  if (id === 'garage') { renderGarage(); }
+}
+const _origGoToDash = goToDashboard;
+function goToDashboard(twin) {
+  _origGoToDash(twin);
+  setTimeout(() => { renderGarage(); renderCarSelectorChips(); applyDesktopLayout(); }, 150);
+}
+
+/* ════════════════════════════════════
+   DESKTOP LAYOUT SWITCHER
+════════════════════════════════════ */
+function applyDesktopLayout() {
+  const dt = window.innerWidth >= 768;
+
+  // Landing: two-column
+  const bodyDt = document.querySelector('.land-body-dt');
+  const rightDt = document.querySelector('.land-right-dt');
+  if (bodyDt) bodyDt.style.display = dt ? 'grid' : 'contents';
+  if (rightDt) rightDt.style.display = dt ? 'flex' : 'none';
+
+  // Nav center label
+  const navCenter = document.querySelector('.nav-center');
+  if (navCenter) navCenter.style.display = dt ? 'block' : 'none';
+
+  // Garage: carousel vs grid
+  const carousel = document.querySelector('.garage-carousel');
+  const dotsCont = document.getElementById('gcDots');
+  const gridDt   = document.getElementById('garageGridDt');
+  if (carousel) carousel.style.display = dt ? 'none' : '';
+  if (dotsCont) dotsCont.style.display = dt ? 'none' : '';
+  if (gridDt)   gridDt.style.display   = dt ? 'grid'  : 'none';
+
+  if (dt) renderGarageGrid();
+}
+
+function renderGarageGrid() {
+  const grid = document.getElementById('garageGridDt');
+  if (!grid) return;
+  const fleet = getFilteredFleet();
+  grid.innerHTML = '';
+  fleet.forEach(car => {
+    const isActive = car.id === activeTileId;
+    const dotCls = { verified:'verified', pending:'pending', building:'building', none:'none' }[car.status] || 'none';
+    let extra = '';
+    if (car.type === 'project') {
+      extra = `<div class="ct-build-bar" style="margin-top:8px"><div class="ct-build-fill" style="width:${car.buildPct}%"></div></div>`;
+    } else if (car.type === 'heritage') {
+      extra = `<div class="ct-auth" style="margin-top:8px"><div class="ct-auth-bar"><div class="ct-auth-fill" style="width:${car.authenticity}%"></div></div><span class="ct-auth-val">${car.authenticity}%</span></div>`;
+    }
+    const div = document.createElement('div');
+    div.className = `car-tile ${car.type}${isActive ? ' active-car' : ''}`;
+    div.onclick = () => openCarSheet(car.id);
+    div.innerHTML = `
+      <div class="ct-type-badge ${car.type}"><div class="ct-status-dot ${dotCls}"></div>${car.type.toUpperCase()}</div>
+      <div class="ct-name">${car.name}</div>
+      <div class="ct-year">${car.year} · ${car.class}</div>
+      <div class="ct-stat" style="margin-top:8px"><div class="ct-stat-val ${car.type}">${car.statVal}</div><div class="ct-stat-key">${car.statKey}</div></div>
+      ${extra}`;
+    grid.appendChild(div);
+  });
+}
+
+// also re-apply on resize
+window.addEventListener('resize', () => {
+  applyDesktopLayout();
+  renderGarage();
+}, { passive: true });
+
+// init on load
+document.addEventListener('DOMContentLoaded', applyDesktopLayout);
+
+/* ════════════════════════════════════
+   SHARE CARD ENGINE
+════════════════════════════════════ */
+let currentFormat = 'story'; // story | square | wide
+const FORMATS = {
+  story:  { w: 1080, h: 1920, ratio: '9/16' },
+  square: { w: 1080, h: 1080, ratio: '1/1'  },
+  wide:   { w: 1080, h: 1350, ratio: '4/5'  },
+};
+
+function openShareModal() {
+  const overlay = document.getElementById('shareOverlay');
+  overlay.classList.add('open');
+  // prevent body scroll
+  document.body.style.overflow = 'hidden';
+  currentFormat = 'story';
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fmt-story').classList.add('active');
+  updateCanvasAspect();
+  renderCard();
+}
+
+function closeShareModal() {
+  document.getElementById('shareOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function setFormat(fmt, btn) {
+  currentFormat = fmt;
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateCanvasAspect();
+  renderCard();
+}
+
+function updateCanvasAspect() {
+  const wrap = document.getElementById('shareCanvasWrap');
+  wrap.style.aspectRatio = FORMATS[currentFormat].ratio;
+}
+
+/* ── CANVAS RENDERER ── */
+function renderCard() {
+  const fmt = FORMATS[currentFormat];
+  const canvas = document.getElementById('shareCanvas');
+  canvas.width  = fmt.w;
+  canvas.height = fmt.h;
+  const ctx = canvas.getContext('2d');
+
+  const W = fmt.w, H = fmt.h;
+
+  // Pull live data from dashboard state
+  const handle  = document.getElementById('dash-handle')?.textContent  || '@PILOT';
+  const lapTime  = document.getElementById('dash-bestlap')?.textContent || '—';
+  const rank     = document.getElementById('dash-rank')?.textContent    || '#—';
+  const carName  = document.getElementById('garage-car-name')?.textContent || 'Machine';
+  const cls      = document.getElementById('dash-class-tag')?.textContent  || 'GT Class';
+  const ecu      = document.getElementById('gs-ecu')?.textContent  || '';
+  const susp     = document.getElementById('gs-susp')?.textContent || '';
+
+  const CYAN   = '#00D4E8';
+  const ORANGE = '#FF5733';
+  const GHOST  = '#E5E5E5';
+  const DIM    = '#555566';
+  const BG     = '#08080A';
+  const BG2    = '#0d0d0f';
+  const B1     = '#1a1a1e';
+  const B2     = '#2a2a32';
+
+  // ── BACKGROUND ──
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── GRID LINES ──
+  const GRID = Math.round(W * 0.044); // ~48px on 1080
+  ctx.strokeStyle = 'rgba(0,212,232,0.022)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += GRID) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += GRID) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  // ── AMBIENT GLOW (top-left) ──
+  const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, W * 0.65);
+  grd.addColorStop(0, 'rgba(0,212,232,0.07)');
+  grd.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── SCANLINES overlay ──
+  for (let y = 0; y < H; y += 4) {
+    ctx.fillStyle = 'rgba(0,0,0,0.04)';
+    ctx.fillRect(0, y + 2, W, 2);
+  }
+
+  const PAD = Math.round(W * 0.055); // ~60px
+
+  // ── TOP BAR ──
+  ctx.fillStyle = BG2;
+  ctx.fillRect(0, 0, W, Math.round(H * 0.065));
+  // cyan accent line
+  ctx.fillStyle = CYAN;
+  ctx.fillRect(0, Math.round(H * 0.065) - 2, W, 2);
+  // logo
+  ctx.font = `700 ${Math.round(W * 0.032)}px 'Chakra Petch', monospace`;
+  ctx.fillStyle = CYAN;
+  ctx.letterSpacing = '0.28em';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('AUTOGRAMM', PAD, Math.round(H * 0.033));
+  // live indicator
+  const liveX = W - PAD;
+  ctx.font = `${Math.round(W * 0.02)}px 'JetBrains Mono', monospace`;
+  ctx.fillStyle = DIM;
+  ctx.textAlign = 'right';
+  ctx.fillText('LIVE', liveX, Math.round(H * 0.033));
+  ctx.beginPath();
+  ctx.arc(liveX - Math.round(W * 0.03), Math.round(H * 0.033), Math.round(W * 0.008), 0, Math.PI * 2);
+  ctx.fillStyle = CYAN;
+  ctx.fill();
+  ctx.textAlign = 'left';
+
+  const topBarH = Math.round(H * 0.065);
+
+  // ── VERIFIED STAMP (top right corner) ──
+  const stampW = Math.round(W * 0.22), stampH = Math.round(W * 0.065);
+  const stampX = W - PAD - stampW, stampY = topBarH + Math.round(H * 0.025);
+  ctx.fillStyle = 'rgba(0,212,232,0.07)';
+  ctx.strokeStyle = 'rgba(0,212,232,0.25)';
+  ctx.lineWidth = 1;
+  // hexagonal stamp shape
+  drawSkewRect(ctx, stampX, stampY, stampW, stampH, Math.round(W*0.012));
+  ctx.fill(); ctx.stroke();
+  ctx.font = `700 ${Math.round(W * 0.016)}px 'JetBrains Mono', monospace`;
+  ctx.fillStyle = CYAN;
+  ctx.textAlign = 'center';
+  ctx.fillText('✓ VERIFIED', stampX + stampW/2, stampY + stampH/2 + Math.round(W * 0.006));
+  ctx.textAlign = 'left';
+
+  // ── HANDLE ──
+  const handleY = topBarH + Math.round(H * 0.1);
+  ctx.font = `700 ${Math.round(W * 0.07)}px 'Chakra Petch', monospace`;
+  ctx.fillStyle = GHOST;
+  ctx.fillText(handle.toUpperCase(), PAD, handleY);
+  // subtitle
+  ctx.font = `${Math.round(W * 0.025)}px 'JetBrains Mono', monospace`;
+  ctx.fillStyle = CYAN;
+  ctx.fillText('// AUTOGRAMM™  ·  MOSCOW RACEWAY', PAD, handleY + Math.round(H * 0.038));
+
+  // ── DIVIDER ──
+  const divY = handleY + Math.round(H * 0.06);
+  ctx.strokeStyle = B2; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD, divY); ctx.lineTo(W - PAD, divY); ctx.stroke();
+
+  // ── BIG LAP TIME ──
+  const lapY = divY + Math.round(H * 0.11);
+  ctx.font = `700 ${Math.round(W * 0.175)}px 'JetBrains Mono', monospace`;
+  ctx.fillStyle = CYAN;
+  ctx.fillText(lapTime, PAD - Math.round(W*0.005), lapY);
+  // label
+  ctx.font = `${Math.round(W * 0.022)}px 'JetBrains Mono', monospace`;
+  ctx.fillStyle = DIM;
+  ctx.letterSpacing = '0.15em';
+  ctx.fillText('BEST LAP · VERIFIED', PAD, lapY + Math.round(H * 0.025));
+  ctx.letterSpacing = '0';
+
+  // ── TRACK & DATE ──
+  ctx.font = `${Math.round(W * 0.026)}px 'JetBrains Mono', monospace`;
+  ctx.fillStyle = '#555';
+  ctx.fillText('MOSCOW RACEWAY · FULL LAYOUT · 2025-03-18', PAD, lapY + Math.round(H * 0.055));
+
+  // ── TELEMETRY SPARKLINE ──
+  const sparkY = lapY + Math.round(H * 0.09);
+  const sparkH = Math.round(H * 0.045);
+  const sparkW = W - PAD * 2;
+  drawSparkline(ctx, PAD, sparkY, sparkW, sparkH, CYAN);
+
+  // ── STATS ROW ──
+  const statsY = sparkY + sparkH + Math.round(H * 0.045);
+  const stats = [
+    { val: '238 km/h', key: 'TOP SPEED' },
+    { val: '1.87g',    key: 'PEAK G' },
+    { val: rank,       key: 'GT RANK' },
+    { val: '92%',      key: 'CONSISTENCY' },
+  ];
+  const colW = (W - PAD * 2) / stats.length;
+  stats.forEach((s, i) => {
+    const x = PAD + i * colW;
+    // vertical divider
+    if (i > 0) {
+      ctx.strokeStyle = B2; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, statsY - Math.round(H*0.01)); ctx.lineTo(x, statsY + Math.round(H*0.065)); ctx.stroke();
+    }
+    ctx.font = `700 ${Math.round(W * 0.048)}px 'JetBrains Mono', monospace`;
+    ctx.fillStyle = i === 2 ? ORANGE : GHOST;
+    ctx.fillText(s.val, x + Math.round(W*0.01), statsY + Math.round(H*0.038));
+    ctx.font = `${Math.round(W * 0.018)}px 'JetBrains Mono', monospace`;
+    ctx.fillStyle = DIM;
+    ctx.fillText(s.key, x + Math.round(W*0.01), statsY + Math.round(H*0.058));
+  });
+
+  // ── DIVIDER 2 ──
+  const div2Y = statsY + Math.round(H * 0.085);
+  ctx.strokeStyle = B2; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD, div2Y); ctx.lineTo(W - PAD, div2Y); ctx.stroke();
+
+  // ── CAR SECTION ──
+  const carY = div2Y + Math.round(H * 0.04);
+  ctx.font = `700 ${Math.round(W * 0.055)}px 'Chakra Petch', monospace`;
+  ctx.fillStyle = GHOST;
+  ctx.fillText(carName.toUpperCase(), PAD, carY + Math.round(H * 0.035));
+  ctx.font = `${Math.round(W * 0.024)}px 'JetBrains Mono', monospace`;
+  ctx.fillStyle = CYAN;
+  ctx.fillText(cls.toUpperCase(), PAD, carY + Math.round(H * 0.065));
+
+  // spec pills
+  const specs = [ecu, susp].filter(Boolean);
+  let pillX = PAD;
+  const pillY = carY + Math.round(H * 0.085);
+  specs.forEach(spec => {
+    if (!spec || spec === '—') return;
+    const fw = Math.round(W * 0.022);
+    ctx.font = `${fw}px 'JetBrains Mono', monospace`;
+    const tw = ctx.measureText(spec).width;
+    const ph = Math.round(H * 0.03), ppad = Math.round(W * 0.018);
+    if (pillX + tw + ppad * 2 > W - PAD) return;
+    ctx.fillStyle = 'rgba(0,212,232,0.08)';
+    ctx.strokeStyle = 'rgba(0,212,232,0.22)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, pillX, pillY - ph/2 - Math.round(H*0.005), tw + ppad*2, ph + Math.round(H*0.005), 0);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = CYAN;
+    ctx.fillText(spec, pillX + ppad, pillY + Math.round(H*0.006));
+    pillX += tw + ppad * 2 + Math.round(W * 0.015);
+  });
+
+  // ── BOTTOM BAR (only story/wide) ──
+  if (currentFormat !== 'square') {
+    const botH = Math.round(H * 0.065);
+    const botY = H - botH;
+    ctx.fillStyle = BG2;
+    ctx.fillRect(0, botY, W, botH);
+    ctx.fillStyle = CYAN;
+    ctx.fillRect(0, botY, W, 2);
+    ctx.font = `${Math.round(W * 0.022)}px 'JetBrains Mono', monospace`;
+    ctx.fillStyle = DIM;
+    ctx.fillText('IF IT\'S NOT LOGGED — IT DIDN\'T HAPPEN.', PAD, botY + botH/2 + Math.round(W*0.008));
+    ctx.textAlign = 'right';
+    ctx.fillStyle = CYAN;
+    ctx.fillText('autogramm.vercel.app', W - PAD, botY + botH/2 + Math.round(W*0.008));
+    ctx.textAlign = 'left';
+  }
+
+  // ── ORANGE ACCENT BAR (left edge) ──
+  ctx.fillStyle = ORANGE;
+  ctx.fillRect(0, topBarH + Math.round(H*0.02), Math.round(W*0.006), Math.round(H*0.18));
+}
+
+/* ── HELPERS ── */
+function drawSkewRect(ctx, x, y, w, h, skew) {
+  ctx.beginPath();
+  ctx.moveTo(x + skew, y);
+  ctx.lineTo(x + w, y);
+  ctx.lineTo(x + w - skew, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.closePath();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+function drawSparkline(ctx, x, y, w, h, color) {
+  // Generate a realistic speed trace
+  const pts = [
+    [0,.65],[.04,.62],[.09,.25],[.13,.2],[.18,.7],[.24,.78],
+    [.28,.42],[.33,.3],[.37,.58],[.42,.65],[.46,.1],[.52,.0],
+    [.56,.52],[.61,.58],[.65,.2],[.7,.12],[.74,.44],[.8,.7],
+    [.83,.32],[.88,.18],[.91,.38],[.95,.44],[1,.62],
+  ];
+
+  // gradient fill
+  const grad = ctx.createLinearGradient(x, y, x, y + h);
+  grad.addColorStop(0, `rgba(0,212,232,0.3)`);
+  grad.addColorStop(1, `rgba(0,212,232,0)`);
+
+  ctx.beginPath();
+  ctx.moveTo(x + pts[0][0]*w, y + pts[0][1]*h);
+  pts.forEach(([px, py]) => ctx.lineTo(x + px*w, y + py*h));
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // line
+  ctx.beginPath();
+  ctx.moveTo(x + pts[0][0]*w, y + pts[0][1]*h);
+  pts.forEach(([px, py]) => ctx.lineTo(x + px*w, y + py*h));
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.round(w * 0.004);
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // sector marker — where time is lost
+  const lossX = x + 0.52 * w;
+  ctx.strokeStyle = 'rgba(255,87,51,0.6)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(lossX, y - Math.round(h*0.2)); ctx.lineTo(lossX, y + h); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.font = `${Math.round(w * 0.018)}px 'JetBrains Mono', monospace`;
+  ctx.fillStyle = 'rgba(255,87,51,0.7)';
+  ctx.fillText('S2 -0.4s', lossX + Math.round(w*0.01), y - Math.round(h*0.08));
+}
+
+/* ── DOWNLOAD ── */
+function downloadCard() {
+  const canvas = document.getElementById('shareCanvas');
+  const handle = (document.getElementById('dash-handle')?.textContent || '@pilot')
+    .replace('@','').toLowerCase();
+  const link = document.createElement('a');
+  link.download = `autogramm_${handle}_${currentFormat}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+/* ── NATIVE SHARE ── */
+async function nativeShare() {
+  if (!navigator.share) return;
+  const canvas = document.getElementById('shareCanvas');
+  canvas.toBlob(async blob => {
+    const handle = (document.getElementById('dash-handle')?.textContent || '@pilot')
+      .replace('@','').toLowerCase();
+    const file = new File([blob], `autogramm_${handle}.png`, { type: 'image/png' });
+    try {
+      await navigator.share({
+        title: 'My Autogramm · Verified Lap',
+        text: `${document.getElementById('dash-bestlap')?.textContent} — verified on Moscow Raceway. autogramm.vercel.app`,
+        files: [file],
+      });
+    } catch(e) {
+      // user cancelled or not supported — silently fall back
+      downloadCard();
+    }
+  }, 'image/png');
+}
+
+/* ── HOOK SHARE BUTTONS ── */
+// override the act-btn "Share Card" in lap panel
+document.addEventListener('click', e => {
+  if (e.target.matches('.act-btn') && e.target.textContent.includes('Share')) {
+    e.preventDefault();
+    openShareModal();
+  }
+});
+</script>
+</body>
+</html>
