@@ -1458,11 +1458,212 @@ body::after {
 
 /* Mobile onboard wrapper */
 .onboard-mobile-wrap { display: flex; flex-direction: column; flex: 1; overflow: hidden; min-height: 0; }
+
+/* ═══════════════════════════════════
+   PUBLIC PROFILE SCREEN
+═══════════════════════════════════ */
+#screen-public { background: var(--bg); }
+
+.pub-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.pub-scroll::-webkit-scrollbar { display: none; }
+
+/* hero */
+.pub-hero {
+  background: linear-gradient(135deg, var(--bg) 0%, #0f0f12 100%);
+  padding: 20px 16px 0; position: relative; overflow: hidden;
+  border-bottom: 0.5px solid var(--b1);
+}
+.pub-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(0,212,232,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,232,.02) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none;
+}
+.pub-hero-row { display: flex; gap: 12px; align-items: flex-start; position: relative; z-index: 1; }
+.pub-avatar {
+  width: 56px; height: 56px; flex-shrink: 0;
+  background: var(--bg2); border: 1.5px solid var(--cyan);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Chakra Petch', monospace; font-size: 18px; font-weight: 700; color: var(--cyan);
+  position: relative;
+}
+.pub-avatar::after {
+  content: '✓ VERIFIED'; position: absolute; bottom: -7px; left: 50%; transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .1em;
+  color: #08080A; background: var(--cyan); padding: 2px 5px; white-space: nowrap;
+  clip-path: polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%);
+}
+.pub-info { flex: 1; min-width: 0; }
+.pub-handle {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 20px; font-weight: 700; color: var(--ghost); line-height: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pub-sub { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--cyan); letter-spacing: .1em; margin-top: 3px; }
+.pub-tags { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+.pub-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .08em;
+  padding: 2px 7px; border: 0.5px solid #2a2a30; color: #666; text-transform: uppercase;
+}
+.pub-tag.c { border-color: rgba(0,212,232,.3); color: var(--cyan); }
+.pub-tag.o { border-color: rgba(255,87,51,.3); color: var(--orange); }
+
+.pub-stats {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 1px; background: var(--b1); margin: 14px -16px 0; position: relative; z-index: 1;
+}
+.pub-st { background: var(--bg); padding: 10px 8px; text-align: center; }
+.pub-st-num { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--ghost); font-variant-numeric: tabular-nums; }
+.pub-st-num.c { color: var(--cyan); }
+.pub-st-lbl { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .1em; color: #555; text-transform: uppercase; margin-top: 2px; }
+
+/* rank badge */
+.pub-rank-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,212,232,.07); border: 0.5px solid rgba(0,212,232,.2);
+  padding: 5px 12px; margin: 0 16px 14px; position: relative; z-index: 1;
+}
+.pub-rank-pos { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.pub-rank-label { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #555; letter-spacing: .1em; text-transform: uppercase; }
+
+/* body padding */
+.pub-body { padding: 16px; }
+
+/* twin card */
+.pub-twin {
+  background: var(--bg2); border: 0.5px solid #1e1e22;
+  border-top: 2px solid var(--cyan); margin-bottom: 12px;
+}
+.pub-twin-hd {
+  padding: 10px 12px; border-bottom: 0.5px solid var(--b1);
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .16em; color: var(--dim); text-transform: uppercase;
+}
+.pub-twin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.pub-twin-row { padding: 8px 12px; border-bottom: 0.5px solid #0f0f11; display: flex; flex-direction: column; gap: 2px; }
+.pub-twin-row:nth-child(odd)  { border-right: 0.5px solid #0f0f11; }
+.pub-twin-row:last-child, .pub-twin-row:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+.pub-tk { font-family: 'JetBrains Mono', monospace; font-size: 7px; color: #444; letter-spacing: .1em; text-transform: uppercase; }
+.pub-tv { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ghost); }
+.pub-tv.c { color: var(--cyan); }
+
+/* telem strip */
+.pub-spark { height: 32px; margin: 0 0 12px; }
+.pub-spark svg { width: 100%; height: 100%; display: block; }
+
+/* CTA bottom */
+.pub-cta-block {
+  background: var(--bg2); border: 0.5px solid var(--b2);
+  border-top: 2px solid var(--orange); padding: 16px; margin-bottom: 12px;
+}
+.pub-cta-msg {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: #666; letter-spacing: .04em; line-height: 1.7; margin-bottom: 12px;
+}
+.pub-cta-msg strong { color: var(--ghost); }
+.pub-cta-btn {
+  font-family: 'Chakra Petch', monospace; font-size: 12px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; color: #08080A;
+  background: var(--cyan); border: none; padding: 15px 20px; cursor: pointer;
+  clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  width: 100%; transition: box-shadow .2s;
+}
+.pub-cta-btn:active { box-shadow: 0 0 20px rgba(0,212,232,.4); }
+.pub-share-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--dim); background: transparent;
+  border: 0.5px solid var(--b2); padding: 13px 20px; cursor: pointer;
+  clip-path: polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+  width: 100%; margin-top: 7px; transition: all .2s;
+}
+.pub-share-btn:active { color: var(--ghost); border-color: #555; }
+
+/* back source indicator */
+.pub-back-source {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: .1em; color: #333; text-align: center;
+  padding: 8px; text-transform: uppercase;
+}
 </style>
 </head>
 <body>
 
 <div class="verified-flash" id="verifiedFlash"></div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 4: PUBLIC PROFILE (read-only)
+════════════════════════════════════════ -->
+<div class="screen hidden" id="screen-public">
+  <div class="nav">
+    <div class="nav-logo">AUTO<em>GRAMM</em></div>
+    <div class="nav-right" style="cursor:pointer" id="pubBackBtn">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="10 3 5 8 10 13"/></svg>
+      Back
+    </div>
+  </div>
+
+  <div class="pub-scroll">
+    <!-- hero -->
+    <div class="pub-hero">
+      <div class="pub-hero-row">
+        <div class="pub-avatar" id="pub-avatar">?</div>
+        <div class="pub-info">
+          <div class="pub-handle" id="pub-handle">@MACHINE</div>
+          <div class="pub-sub">// AUTOGRAMM™ · VERIFIED BUILD</div>
+          <div class="pub-tags" id="pub-tags"></div>
+        </div>
+      </div>
+      <div class="pub-stats">
+        <div class="pub-st"><div class="pub-st-num c" id="pub-lap">—</div><div class="pub-st-lbl">Best Lap</div></div>
+        <div class="pub-st"><div class="pub-st-num" id="pub-sessions">—</div><div class="pub-st-lbl">Sessions</div></div>
+        <div class="pub-st"><div class="pub-st-num" id="pub-hrs">—</div><div class="pub-st-lbl">Track hrs</div></div>
+      </div>
+    </div>
+
+    <!-- rank badge -->
+    <div style="padding:12px 16px 0;display:flex;align-items:center;gap:10px">
+      <div class="pub-rank-badge" style="margin:0">
+        <div class="pub-rank-pos" id="pub-rank-pos">#01</div>
+        <div class="pub-rank-label" id="pub-rank-label">GT Class<br>Moscow Raceway</div>
+      </div>
+      <div style="flex:1;height:1px;background:var(--b1)"></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#333;letter-spacing:.06em">+0.000 gap</div>
+    </div>
+
+    <div class="pub-body">
+      <!-- sparkline -->
+      <div class="pub-spark">
+        <svg viewBox="0 0 375 32" preserveAspectRatio="none">
+          <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00D4E8" stop-opacity=".25"/><stop offset="100%" stop-color="#00D4E8" stop-opacity="0"/></linearGradient></defs>
+          <polygon points="0,28 20,28 34,10 50,8 68,30 90,32 102,18 120,14 136,28 154,30 168,7 188,2 200,22 218,25 230,12 250,10 264,20 280,28 292,14 308,8 322,18 340,22 354,5 370,2 375,14 375,32 0,32" fill="url(#sg)"/>
+          <polyline points="0,28 20,28 34,10 50,8 68,30 90,32 102,18 120,14 136,28 154,30 168,7 188,2 200,22 218,25 230,12 250,10 264,20 280,28 292,14 308,8 322,18 340,22 354,5 370,2 375,14" fill="none" stroke="#00D4E8" stroke-width="1.5" stroke-linejoin="round" opacity=".7"/>
+        </svg>
+      </div>
+
+      <!-- Digital Twin specs -->
+      <div class="pub-twin">
+        <div class="pub-twin-hd">// Digital Twin · Machine Specs</div>
+        <div class="pub-twin-grid" id="pub-specs-grid">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="pub-cta-block">
+        <div class="pub-cta-msg">
+          <strong>This is what your machine looks like on Autogramm.</strong><br>
+          Verified build. Verified lap. Public leaderboard. Your hardware earns its rank.
+        </div>
+        <button class="pub-cta-btn" onclick="goToOnboard()">CLAIM YOUR HANDLE →</button>
+        <button class="pub-share-btn" onclick="openShareModal()">⇧ Share this machine</button>
+      </div>
+
+      <div class="pub-back-source" id="pub-back-source">// Moscow Raceway · GT Class Leaderboard</div>
+    </div>
+  </div>
+</div>
 
 <!-- CAR DETAIL BOTTOM SHEET -->
 <div class="car-sheet-backdrop" id="carSheetBackdrop" onclick="closeCarSheet()"></div>
@@ -1535,27 +1736,27 @@ body::after {
           <span class="lbp-title">// Moscow Raceway · GT</span>
           <span class="lbp-live">Live · 38</span>
         </div>
-        <div class="lb-row" onclick="goToOnboard()">
+        <div class="lb-row">
           <span class="lb-pos">01</span>
           <div><div class="lb-car">GT-R R35</div><div class="lb-spec">Haltech Elite 2500 · HKS GT800</div></div>
           <div class="lb-time-col"><div class="lb-time">1:42.381</div><div class="lb-delta">—</div></div>
         </div>
-        <div class="lb-row" onclick="goToOnboard()">
+        <div class="lb-row">
           <span class="lb-pos">02</span>
           <div><div class="lb-car">BMW M3 E92</div><div class="lb-spec">KW V3 · MHD Stage 2</div></div>
           <div class="lb-time-col"><div class="lb-time">1:43.014</div><div class="lb-delta">+0.633</div></div>
         </div>
-        <div class="lb-row" onclick="goToOnboard()">
+        <div class="lb-row">
           <span class="lb-pos">03</span>
           <div><div class="lb-car">GR86</div><div class="lb-spec">BC Racing · R888R</div></div>
           <div class="lb-time-col"><div class="lb-time">1:43.777</div><div class="lb-delta">+1.396</div></div>
         </div>
-        <div class="lb-row" onclick="goToOnboard()">
+        <div class="lb-row">
           <span class="lb-pos">04</span>
           <div><div class="lb-car">Civic Type R FK8</div><div class="lb-spec">Mugen Aero</div></div>
           <div class="lb-time-col"><div class="lb-time" style="color:var(--dim)">1:44.220</div><div class="lb-delta">+1.839</div></div>
         </div>
-        <div class="lb-row" onclick="goToOnboard()" style="border-bottom:none">
+        <div class="lb-row" style="border-bottom:none">
           <span class="lb-pos">05</span>
           <div><div class="lb-car">BMW M4 G82</div><div class="lb-spec">CSL Parts · Cup 2</div></div>
           <div class="lb-time-col"><div class="lb-time">1:44.811</div><div class="lb-delta">+2.430</div></div>
@@ -1581,37 +1782,37 @@ body::after {
           <span class="lbp-title">38 machines verified</span>
           <span class="lbp-live">Live · Updating</span>
         </div>
-        <div class="lb-row" onclick="goToOnboard()">
+        <div class="lb-row">
           <span class="lb-pos">01</span>
           <div><div class="lb-car">GT-R R35</div><div class="lb-spec">Haltech Elite 2500 · HKS GT800 · Rays TE37</div></div>
           <div class="lb-time-col"><div class="lb-time">1:42.381</div><div class="lb-delta">—</div></div>
         </div>
-        <div class="lb-row" onclick="goToOnboard()">
+        <div class="lb-row">
           <span class="lb-pos">02</span>
           <div><div class="lb-car">BMW M3 E92</div><div class="lb-spec">KW V3 · MHD Stage 2 · Stoptech ST-60</div></div>
           <div class="lb-time-col"><div class="lb-time">1:43.014</div><div class="lb-delta">+0.633</div></div>
         </div>
-        <div class="lb-row" onclick="goToOnboard()">
+        <div class="lb-row">
           <span class="lb-pos">03</span>
           <div><div class="lb-car">GR86</div><div class="lb-spec">BC Racing BR · Radium FPR · R888R</div></div>
           <div class="lb-time-col"><div class="lb-time">1:43.777</div><div class="lb-delta">+1.396</div></div>
         </div>
-        <div class="lb-row" onclick="goToOnboard()">
+        <div class="lb-row">
           <span class="lb-pos">04</span>
           <div><div class="lb-car">Civic Type R FK8</div><div class="lb-spec">Mugen Aero · Endless Brakes</div></div>
           <div class="lb-time-col"><div class="lb-time" style="color:var(--dim)">1:44.220</div><div class="lb-delta">+1.839</div></div>
         </div>
-        <div class="lb-row" onclick="goToOnboard()">
+        <div class="lb-row">
           <span class="lb-pos">05</span>
           <div><div class="lb-car">BMW M4 G82</div><div class="lb-spec">CSL Parts · Michelin Cup 2</div></div>
           <div class="lb-time-col"><div class="lb-time">1:44.811</div><div class="lb-delta">+2.430</div></div>
         </div>
-        <div class="lb-row" onclick="goToOnboard()">
+        <div class="lb-row">
           <span class="lb-pos">06</span>
           <div><div class="lb-car">Porsche 911 GT3</div><div class="lb-spec">PDK · Michelin Cup 2R</div></div>
           <div class="lb-time-col"><div class="lb-time">1:45.102</div><div class="lb-delta">+2.721</div></div>
         </div>
-        <div class="lb-row" onclick="goToOnboard()" style="border-bottom:none">
+        <div class="lb-row" style="border-bottom:none">
           <span class="lb-pos">07</span>
           <div><div class="lb-car">Subaru WRX STI</div><div class="lb-spec">Cobb Stage 3 · Enkei · AD08R</div></div>
           <div class="lb-time-col"><div class="lb-time">1:45.884</div><div class="lb-delta">+3.503</div></div>
@@ -2271,6 +2472,150 @@ document.addEventListener('DOMContentLoaded', () => {
     const nb = document.querySelector('.share-native-btn');
     if (nb) nb.style.display = 'none';
   }
+});
+
+/* ════════════════════════════════════
+   PUBLIC PROFILES — Leaderboard machines
+════════════════════════════════════ */
+const PUBLIC_PROFILES = {
+  'gtr-r35': {
+    handle: '@UNOST83_GTR', car: 'Nissan GT-R R35', year: '2015',
+    lap: '1:42.381', sessions: '12', hrs: '54h', rank: '#01', class: 'GT Pro',
+    gap: '—', delta: '—',
+    specs: [
+      {k:'Engine', v:'VR38DETT · 800hp'},   {k:'ECU', v:'Haltech Elite 2500', c:true},
+      {k:'Suspension', v:'Öhlins TTX'},      {k:'Brakes', v:'Brembo 380mm'},
+      {k:'Tires', v:'Yokohama ADVAN A052'},  {k:'Turbo', v:'HKS GT800 Kit', c:true},
+    ],
+  },
+  'bmw-m3-e92': {
+    handle: '@KORZH_M3', car: 'BMW M3 E92', year: '2009',
+    lap: '1:43.014', sessions: '8', hrs: '38h', rank: '#02', class: 'GT Class',
+    gap: '+0.633', delta: '+0.633s vs P1',
+    specs: [
+      {k:'Engine', v:'S65B40 · 420hp'},      {k:'ECU', v:'MHD Stage 2', c:true},
+      {k:'Suspension', v:'KW V3 Coilovers', c:true}, {k:'Brakes', v:'StopTech 355mm'},
+      {k:'Tires', v:'Michelin PS4S'},         {k:'Exhaust', v:'Akrapovič Slip-On'},
+    ],
+  },
+  'gr86': {
+    handle: '@FLAT6_86', car: 'Toyota GR86', year: '2022',
+    lap: '1:43.777', sessions: '5', hrs: '12h', rank: '#03', class: 'Club-Sport',
+    gap: '+1.396', delta: '+1.396s vs P1',
+    specs: [
+      {k:'Engine', v:'FA24 · 228hp'},         {k:'ECU', v:'Ecutek Stage 1', c:true},
+      {k:'Suspension', v:'BC Racing BR'},      {k:'Brakes', v:'OEM upgraded'},
+      {k:'Tires', v:'Bridgestone R888R'},      {k:'Aero', v:'Voltex Front Lip'},
+    ],
+  },
+  'fk8': {
+    handle: '@VTEC_FK8', car: 'Honda Civic Type R FK8', year: '2020',
+    lap: '1:44.220', sessions: '3', hrs: '4h', rank: '#04', class: 'Club-Sport',
+    gap: '+1.839', delta: '+1.839s vs P1',
+    specs: [
+      {k:'Engine', v:'K20C1 · 320hp'},        {k:'ECU', v:'Hondata FlashPro', c:true},
+      {k:'Suspension', v:'Mugen Springs'},     {k:'Brakes', v:'Brembo OEM'},
+      {k:'Tires', v:'Michelin PS4'},           {k:'Aero', v:'Mugen Full Kit'},
+    ],
+  },
+  'bmw-m4-g82': {
+    handle: '@G82_COMP', car: 'BMW M4 G82', year: '2023',
+    lap: '1:44.811', sessions: '2', hrs: '6h', rank: '#05', class: 'GT Class',
+    gap: '+2.430', delta: '+2.430s vs P1',
+    specs: [
+      {k:'Engine', v:'S58B30 · 530hp'},        {k:'Gearbox', v:'8-speed DCT'},
+      {k:'Suspension', v:'M Adaptive'},         {k:'Brakes', v:'M Carbon Ceramic'},
+      {k:'Tires', v:'Michelin PS4S'},           {k:'Package', v:'Competition xDrive'},
+    ],
+  },
+  '911-gt3': {
+    handle: '@FLAT6_GT3', car: 'Porsche 911 GT3', year: '2022',
+    lap: '1:45.102', sessions: '4', hrs: '18h', rank: '#06', class: 'GT Pro',
+    gap: '+2.721', delta: '+2.721s vs P1',
+    specs: [
+      {k:'Engine', v:'4.0 NA Flat-6 · 510hp'}, {k:'Gearbox', v:'7-speed PDK'},
+      {k:'Suspension', v:'PASM + PDCC'},        {k:'Brakes', v:'PCCB Ceramic'},
+      {k:'Tires', v:'Michelin Cup 2R'},          {k:'Package', v:'Clubsport Pkg'},
+    ],
+  },
+  'wrx-sti': {
+    handle: '@SUBIE_WRX', car: 'Subaru WRX STI', year: '2021',
+    lap: '1:45.884', sessions: '6', hrs: '22h', rank: '#07', class: 'GT Class',
+    gap: '+3.503', delta: '+3.503s vs P1',
+    specs: [
+      {k:'Engine', v:'EJ257 · Cobb Stage 3'},  {k:'ECU', v:'Cobb AccessPort', c:true},
+      {k:'Suspension', v:'Whiteline + Eibach'}, {k:'Brakes', v:'Stoptech ST-40'},
+      {k:'Tires', v:'Yokohama AD09'},           {k:'Wheels', v:'Enkei RPF1'},
+    ],
+  },
+};
+
+let _pubBackTarget = 'landing'; // track where to go back
+
+function openPublicProfile(id, backTarget) {
+  const p = PUBLIC_PROFILES[id];
+  if (!p) return;
+  _pubBackTarget = backTarget || 'landing';
+
+  // avatar initials
+  const initials = p.car.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+  document.getElementById('pub-avatar').textContent = initials;
+  document.getElementById('pub-handle').textContent = p.handle;
+  document.getElementById('pub-lap').textContent     = p.lap;
+  document.getElementById('pub-sessions').textContent = p.sessions;
+  document.getElementById('pub-hrs').textContent      = p.hrs;
+  document.getElementById('pub-rank-pos').textContent  = p.rank;
+  document.getElementById('pub-rank-label').innerHTML  = `${p.class}<br>Moscow Raceway`;
+
+  // tags
+  const tags = document.getElementById('pub-tags');
+  tags.innerHTML = `<span class="pub-tag c">${p.class}</span><span class="pub-tag o">Verified Origin</span>`;
+
+  // specs grid
+  const grid = document.getElementById('pub-specs-grid');
+  grid.innerHTML = p.specs.map(s =>
+    `<div class="pub-twin-row"><span class="pub-tk">${s.k}</span><span class="pub-tv${s.c?' c':''}">${s.v}</span></div>`
+  ).join('');
+
+  // back source label
+  document.getElementById('pub-back-source').textContent =
+    `// Moscow Raceway · ${p.class} Leaderboard`;
+
+  // back button
+  document.getElementById('pubBackBtn').onclick = () => {
+    if (_pubBackTarget === 'dash') showScreen('dash');
+    else showScreen('landing');
+  };
+
+  showScreen('public');
+}
+
+/* update ALL lb-row onclick in landing and dashboard leaderboard */
+document.addEventListener('DOMContentLoaded', () => {
+  // wire up leaderboard rows after DOM is ready
+  const LB_MAP = {
+    'GT-R R35':          'gtr-r35',
+    'BMW M3 E92':        'bmw-m3-e92',
+    'GR86':              'gr86',
+    'Civic Type R FK8':  'fk8',
+    'BMW M4 G82':        'bmw-m4-g82',
+    'Porsche 911 GT3':   '911-gt3',
+    'Subaru WRX STI':    'wrx-sti',
+  };
+  document.querySelectorAll('.lb-row, .lb-row-d').forEach(row => {
+    const carEl = row.querySelector('.lb-car, .lbd-car');
+    if (!carEl) return;
+    const carName = carEl.textContent.trim();
+    const id = LB_MAP[carName];
+    if (!id) return;
+    const inDash = !!row.closest('#screen-dash');
+    row.onclick = () => openPublicProfile(id, inDash ? 'dash' : 'landing');
+  });
+
+  // also wire lbp-foot → onboard
+  document.querySelectorAll('.lbp-foot').forEach(el => {
+    el.onclick = () => goToOnboard();
+  });
 });
 
 /* ════════════════════════════════════
